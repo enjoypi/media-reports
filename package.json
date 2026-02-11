@@ -1,0 +1,26 @@
+{
+  "name": "coursera-subtitle-dl",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli/index.js",
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.1",
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "commander": "^14.0.3",
+    "p-limit": "^7.3.0",
+    "tough-cookie": "^6.0.0",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@types/tough-cookie": "^4.0.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
