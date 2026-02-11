@@ -52,7 +52,7 @@ export function loadConfig(explicitPath?: string): AppConfig {
     config = readAndMerge(explicitPath);
   } else {
     const found = CONFIG_PATHS.find((p) => existsSync(p));
-    config = found ? readAndMerge(found) : { ...DEFAULT_CONFIG };
+    config = found ? readAndMerge(found) : structuredClone(DEFAULT_CONFIG);
     if (!found) info('未找到配置文件，使用默认配置');
   }
   applyEnvOverrides(config);

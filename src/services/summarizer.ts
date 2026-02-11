@@ -8,7 +8,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type OpenAI from 'openai';
 import type { AppConfig } from '../models/config.js';
-import type { SubCourse, ScannedWeek } from '../models/course-scan.js';
+import type { SubCourse } from '../models/course-scan.js';
 import { parseVttFile } from './vtt-parser.js';
 import { chatComplete } from '../lib/llm-client.js';
 import { info, error as logError } from '../lib/logger.js';
@@ -41,7 +41,6 @@ function buildFullContent(subCourse: SubCourse): string {
 
 export interface SummarizeOptions {
   outputDir?: string;
-  force?: boolean;
 }
 
 export async function summarizeSubCourse(

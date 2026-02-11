@@ -44,7 +44,7 @@ export function registerSummarize(program: Command): void {
                 info(`跳过（已存在）: ${summaryPath}，使用 --force 覆盖`);
                 continue;
               }
-              await summarizeSubCourse(client, config, sc, { outputDir: outDir, force: opts.force });
+              await summarizeSubCourse(client, config, sc, { outputDir: outDir });
             }
           } catch (err) {
             logError(`课程处理失败 [${absPath}]: ${(err as Error).message}`);
