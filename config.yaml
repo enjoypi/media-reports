@@ -1,0 +1,32 @@
+# Coursera 字幕下载器配置文件
+# 复制为 config.yaml 并按需修改
+
+output_dir: ./downloads
+cookies_file: ./cookies.txt
+concurrency: 3
+timeout: 30
+retry_max: 3
+preferred_lang: en
+max_filename_length: 200
+retry_base_ms: 1000
+user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+# LLM 配置（兼容 OpenAI 格式的 API）
+# api_key 优先从环境变量 LLM_API_KEY 读取（支持 .env 文件）
+# 同理支持 LLM_BASE_URL、LLM_MODEL
+llm:
+  base_url: https://api.openai.com/v1  # 支持自定义 endpoint（如本地模型）
+  api_key: ""                           # 建议通过 .env 或环境变量设置
+  model: gpt-4o
+
+# 总结配置
+summarize:
+  # 自定义 Prompt（留空则使用内置默认 Prompt）
+  # 示例：生成中文结构化学习笔记
+  prompt: |
+    请总结以下课程字幕内容的核心知识点，生成结构化的学习笔记。
+    要求：
+    - 提取关键概念和重要定义
+    - 归纳核心论点和结论
+    - 使用 Markdown 格式，层次分明
+    - 保留重要的专业术语（英文原文）

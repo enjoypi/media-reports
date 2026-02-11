@@ -1,3 +1,13 @@
+export interface LlmConfig {
+  base_url: string;
+  api_key: string;
+  model: string;
+}
+
+export interface SummarizeConfig {
+  prompt: string;
+}
+
 export interface AppConfig {
   output_dir: string;
   cookies_file: string;
@@ -8,6 +18,8 @@ export interface AppConfig {
   max_filename_length: number;
   retry_base_ms: number;
   user_agent: string;
+  llm: LlmConfig;
+  summarize: SummarizeConfig;
 }
 
 export const DEFAULT_CONFIG: AppConfig = {
@@ -21,4 +33,12 @@ export const DEFAULT_CONFIG: AppConfig = {
   retry_base_ms: 1000,
   user_agent:
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  llm: {
+    base_url: 'https://api.openai.com/v1',
+    api_key: '',
+    model: 'gpt-4o',
+  },
+  summarize: {
+    prompt: '',
+  },
 };

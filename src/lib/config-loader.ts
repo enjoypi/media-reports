@@ -11,15 +11,50 @@ const CONFIG_PATHS = [
   join(homedir(), '.coursera-subtitle-dl', CONFIG_FILENAME),
 ];
 
-export function loadConfig(): AppConfig {
-  for (const p of CONFIG_PATHS) {
-    if (existsSync(p)) {
-      info(`加载配置: ${p}`);
-      const raw = readFileSync(p, 'utf-8');
-      const parsed = parse(raw) as Partial<AppConfig> | null;
-      return { ...DEFAULT_CONFIG, ...parsed };
-    }
+function loadDotEnv(): void {
+  const envPath = join(process.cwd(), '.env');
+  if (!existsSync(envPath)) return;
+  const lines = readFileSync(envPath, 'utf-8').split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx < 0) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+    if (!process.env[key]) process.env[key] = val;
   }
-  info('未找到配置文件，使用默认配置');
-  return { ...DEFAULT_CONFIG };
+}
+
+function applyEnvOverrides(config: AppConfig): void {
+  if (process.env['LLM_API_KEY']) config.llm.api_key = process.env['LLM_API_KEY'];
+  if (process.env['LLM_BASE_URL']) config.llm.base_url = process.env['LLM_BASE_URL'];
+  if (process.env['LLM_MODEL']) config.llm.model = process.env['LLM_MODEL'];
+}
+
+function readAndMerge(p: string): AppConfig {
+  info(`加载配置: ${p}`);
+  const raw = readFileSync(p, 'utf-8');
+  const parsed = parse(raw) as Partial<AppConfig> | null;
+  return {
+    ...DEFAULT_CONFIG,
+    ...parsed,
+    llm: { ...DEFAULT_CONFIG.llm, ...(parsed?.llm ?? {}) },
+    summarize: { ...DEFAULT_CONFIG.summarize, ...(parsed?.summarize ?? {}) },
+  };
+}
+
+export function loadConfig(explicitPath?: string): AppConfig {
+  loadDotEnv();
+  let config: AppConfig;
+  if (explicitPath) {
+    if (!existsSync(explicitPath)) throw new Error(`配置文件不存在: ${explicitPath}`);
+    config = readAndMerge(explicitPath);
+  } else {
+    const found = CONFIG_PATHS.find((p) => existsSync(p));
+    config = found ? readAndMerge(found) : { ...DEFAULT_CONFIG };
+    if (!found) info('未找到配置文件，使用默认配置');
+  }
+  applyEnvOverrides(config);
+  return config;
 }

@@ -8,6 +8,7 @@
 
 import { Command } from 'commander';
 import { registerDownload } from './download.js';
+import { registerSummarize } from './summarize.js';
 
 const program = new Command();
 
@@ -17,6 +18,7 @@ program
   .version('1.0.0');
 
 registerDownload(program);
+registerSummarize(program);
 
 // 向后兼容：argv 中直接传入 URL 时，自动注入 download 子命令
 const userArgStart = 2;

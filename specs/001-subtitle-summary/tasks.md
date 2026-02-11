@@ -14,7 +14,7 @@
 
 **Purpose**: 安装新增依赖
 
-- [ ] T001 安装依赖 `pnpm add openai@* @plussub/srt-vtt-parser@*` 并执行 `pnpm update -L`
+- [X] T001 安装依赖 `pnpm add openai@* @plussub/srt-vtt-parser@*` 并执行 `pnpm update -L`
 
 ---
 
@@ -24,11 +24,11 @@
 
 **⚠️ CRITICAL**: 必须完成后才能开始 User Story 实现
 
-- [ ] T002 扩展 AppConfig 接口，新增 `llm` 和 `summarize` 配置字段 in `src/models/config.ts`
-- [ ] T003 更新 `config.example.yaml` 添加 llm 和 summarize 基础配置结构
-- [ ] T004 [P] 创建 LLM 客户端封装（OpenAI SDK + 自定义 baseURL；集成现有 `withRetry` 重试机制；api_key 或 base_url 缺失时抛出明确错误）in `src/lib/llm-client.ts`
-- [ ] T005 [P] 创建 VTT 解析服务（使用 @plussub/srt-vtt-parser 提取纯文本；文本为空或极短时返回标记）in `src/services/vtt-parser.ts`
-- [ ] T006 [P] 创建课程目录扫描模型（ScannedCourse/SubCourse/ScannedWeek/ScannedLesson 接口）in `src/models/course-scan.ts`
+- [X] T002 扩展 AppConfig 接口，新增 `llm` 和 `summarize` 配置字段 in `src/models/config.ts`
+- [X] T003 更新 `config.example.yaml` 添加 llm 和 summarize 基础配置结构
+- [X] T004 [P] 创建 LLM 客户端封装（OpenAI SDK + 自定义 baseURL；集成现有 `withRetry` 重试机制；api_key 或 base_url 缺失时抛出明确错误）in `src/lib/llm-client.ts`
+- [X] T005 [P] 创建 VTT 解析服务（使用 @plussub/srt-vtt-parser 提取纯文本；文本为空或极短时返回标记）in `src/services/vtt-parser.ts`
+- [X] T006 [P] 创建课程目录扫描模型（ScannedCourse/SubCourse/ScannedWeek/ScannedLesson 接口）in `src/models/course-scan.ts`
 
 **Checkpoint**: 基础设施就绪，可开始 User Story 实现
 
@@ -42,11 +42,11 @@
 
 ### Implementation
 
-- [ ] T007 [US1] 实现课程目录扫描服务（识别单课程和 Specialization 两种结构，按 Week/课时排序；扫描结果为空时抛出明确错误）in `src/services/course-scanner.ts`
-- [ ] T008 [US1] 实现总结服务核心逻辑（按 Week 分段调用 LLM、合并生成 Markdown 文档、内置默认 Prompt；LLM 调用失败时写入已完成 Week 的部分结果；处理目录不存在、VTT 解析失败等错误）in `src/services/summarizer.ts`
-- [ ] T009 [US1] 创建 summarize CLI 子命令（接收课程路径、--config、--output、--force 选项；默认跳过已存在的 summary.md，--force 时覆盖）in `src/cli/summarize.ts`
-- [ ] T010 [US1] 在 CLI 入口注册 summarize 子命令 in `src/cli/index.ts`
-- [ ] T011 [US1] 编译验证 `pnpm run build && pnpm run lint`
+- [X] T007 [US1] 实现课程目录扫描服务（识别单课程和 Specialization 两种结构，按 Week/课时排序；扫描结果为空时抛出明确错误）in `src/services/course-scanner.ts`
+- [X] T008 [US1] 实现总结服务核心逻辑（按 Week 分段调用 LLM、合并生成 Markdown 文档、内置默认 Prompt；LLM 调用失败时写入已完成 Week 的部分结果；处理目录不存在、VTT 解析失败等错误）in `src/services/summarizer.ts`
+- [X] T009 [US1] 创建 summarize CLI 子命令（接收课程路径、--config、--output、--force 选项；默认跳过已存在的 summary.md，--force 时覆盖）in `src/cli/summarize.ts`
+- [X] T010 [US1] 在 CLI 入口注册 summarize 子命令 in `src/cli/index.ts`
+- [X] T011 [US1] 编译验证 `pnpm run build && pnpm run lint`
 
 **Checkpoint**: 单课程总结功能完整可用，可独立测试
 
@@ -60,8 +60,8 @@
 
 ### Implementation
 
-- [ ] T012 [US2] 在 summarizer 服务中读取配置的自定义 Prompt，为空时回退到默认 Prompt 并输出提示 in `src/services/summarizer.ts`
-- [ ] T013 [US2] 编译验证 `pnpm run build && pnpm run lint`
+- [X] T012 [US2] 在 summarizer 服务中读取配置的自定义 Prompt，为空时回退到默认 Prompt 并输出提示 in `src/services/summarizer.ts`
+- [X] T013 [US2] 编译验证 `pnpm run build && pnpm run lint`
 
 **Checkpoint**: 自定义 Prompt 功能可用，修改配置后立即生效
 
@@ -75,8 +75,8 @@
 
 ### Implementation
 
-- [ ] T014 [US3] 在 summarize CLI 中支持多个课程路径参数，循环调用总结服务，单个失败不中断、记录并汇总报告 in `src/cli/summarize.ts`
-- [ ] T015 [US3] 编译验证 `pnpm run build && pnpm run lint`
+- [X] T014 [US3] 在 summarize CLI 中支持多个课程路径参数，循环调用总结服务，单个失败不中断、记录并汇总报告 in `src/cli/summarize.ts`
+- [X] T015 [US3] 编译验证 `pnpm run build && pnpm run lint`
 
 **Checkpoint**: 批量总结功能可用，失败课程被记录并报告
 
@@ -86,8 +86,8 @@
 
 **Purpose**: 完善错误处理和配置示例
 
-- [ ] T016 更新 `config.example.yaml` 完善 summarize prompt 示例内容和注释
-- [ ] T017 运行 quickstart.md 验证：按 `specs/001-subtitle-summary/quickstart.md` 步骤端到端测试
+- [X] T016 更新 `config.example.yaml` 完善 summarize prompt 示例内容和注释
+- [X] T017 运行 quickstart.md 验证：按 `specs/001-subtitle-summary/quickstart.md` 步骤端到端测试
 
 ---
 

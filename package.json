@@ -11,10 +11,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.1",
   "dependencies": {
+    "@plussub/srt-vtt-parser": "^2.0.5",
     "cheerio": "^1.2.0",
     "commander": "^14.0.3",
+    "openai": "^6.21.0",
     "p-limit": "^7.3.0",
     "tough-cookie": "^6.0.0",
+    "undici": "^7.21.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
