@@ -61,7 +61,7 @@ export async function summarizeSubCourse(
 
   try {
     const summary = await chatComplete(
-      client, config.llm.model, prompt,
+      client, config.llm, prompt,
       `# ${subCourse.name}\n\n${content}`,
       config.retry_max, config.retry_base_ms,
     );

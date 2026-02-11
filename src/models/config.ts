@@ -2,6 +2,9 @@ export interface LlmConfig {
   base_url: string;
   api_key: string;
   model: string;
+  reasoning_effort: string;
+  max_completion_tokens: number;
+  timeout: number;
 }
 
 export interface SummarizeConfig {
@@ -37,6 +40,9 @@ export const DEFAULT_CONFIG: AppConfig = {
     base_url: 'https://api.openai.com/v1',
     api_key: '',
     model: 'gpt-4o',
+    reasoning_effort: '',
+    max_completion_tokens: 0,
+    timeout: 600_000,
   },
   summarize: {
     prompt: '',
