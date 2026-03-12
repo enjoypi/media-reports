@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { Command } from 'commander';
 import { createContainer } from './container.js';
-import { error as logError } from '../lib/logger.js';
+import { error as logError } from '../adapters/logger.js';
 
 const DEFAULT_PROMPT = `请基于以下课程字幕内容，生成一份完整、连贯、结构化的课程学习笔记。
 要求：

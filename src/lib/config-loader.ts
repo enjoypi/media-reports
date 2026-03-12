@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { parse } from 'yaml';
 import { AppConfig, DEFAULT_CONFIG } from '../models/config.js';
-import { info } from './logger.js';
+import { info } from '../adapters/logger.js';
 
 const CONFIG_FILENAME = 'config.yaml';
 const CONFIG_PATHS = [

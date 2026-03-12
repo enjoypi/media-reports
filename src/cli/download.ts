@@ -9,7 +9,7 @@ import { Command } from 'commander';
 import { createContainer, extractSpecSlug } from './container.js';
 import { DownloadStatus } from '../ports.js';
 import type { DownloadResult } from '../ports.js';
-import { error as logError } from '../lib/logger.js';
+import { error as logError } from '../adapters/logger.js';
 
 function hasAllFailed(results: DownloadResult[]): boolean {
   return results.length > 0 && results.every((r) => r.status === DownloadStatus.Failed);

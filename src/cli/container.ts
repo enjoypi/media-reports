@@ -23,7 +23,7 @@ import { OpenAiLlmClient } from '../adapters/openai-llm-client.js';
 import { HtmlCourseFetcher } from '../adapters/html-course-fetcher.js';
 import { ApiSpecializationFetcher, extractSpecSlug } from '../adapters/api-specialization-fetcher.js';
 import { loadConfig } from '../lib/config-loader.js';
-import { loadCookies } from '../lib/cookie-loader.js';
+import { loadCookies } from '../adapters/cookie-loader.js';
 
 export interface Container {
   parseCourseUseCase: ParseCourseUseCase;
