@@ -1,5 +1,5 @@
 /**
- * @module cli/summarize
+ * @module frameworks/summarize
  * @description summarize 子命令 — 使用 Clean Architecture 依赖注入
  * @layer Frameworks
  */

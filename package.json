@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/cli/index.js",
+    "start": "node dist/frameworks/index.js",
     "test": "vitest run",
     "lint": "tsc --noEmit"
   },

@@ -4,7 +4,7 @@
  * @layer Adapters
  */
 
-import type { Course, Week, Lesson, SubtitleMeta, CourseFetcher, HttpClient, Logger } from '../ports.js';
+import type { Course, Week, Lesson, SubtitleMeta, CourseFetcher, HttpClient, Logger } from '../usecases/ports.js';
 
 interface LinkedModule { id: string; name: string; }
 interface LinkedLesson { id: string; itemIds: string[]; moduleId: string; }

@@ -6,7 +6,7 @@
 
 import { readdirSync, statSync } from 'node:fs';
 import { join, basename, extname } from 'node:path';
-import type { CourseScanner, ScannedCourse, ScannedLesson, ScannedWeek, SubCourse } from '../ports.js';
+import type { CourseScanner, ScannedCourse, ScannedLesson, ScannedWeek, SubCourse } from '../usecases/ports.js';
 
 const WEEK_PATTERN = /^Week\s+(\d+)$/i;
 const SUB_COURSE_PATTERN = /^(\d+)\s*-\s*/;

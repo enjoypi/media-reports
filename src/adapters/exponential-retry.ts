@@ -4,7 +4,7 @@
  * @layer Adapters
  */
 
-import type { RetryPolicy, Logger } from '../ports.js';
+import type { RetryPolicy, Logger } from '../usecases/ports.js';
 
 export interface ExponentialRetryOptions {
   maxRetries: number;

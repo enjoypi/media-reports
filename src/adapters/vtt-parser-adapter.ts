@@ -6,7 +6,7 @@
 
 import { readFileSync } from 'node:fs';
 import { parse } from '@plussub/srt-vtt-parser';
-import type { VttParser } from '../ports.js';
+import type { VttParser } from '../usecases/ports.js';
 
 export class LibVttParser implements VttParser {
   parse(filePath: string): string {

@@ -1,12 +1,12 @@
 /**
- * @module cli/container
+ * @module frameworks/container
  * @description 依赖注入容器 — 在 Frameworks 层组装所有依赖
  * @layer Frameworks
  *
  * 这是唯一知道所有具体实现的地方，负责将 Adapter 注入到 Use Case
  */
 
-import type { AppConfig } from '../ports.js';
+import type { AppConfig } from '../usecases/ports.js';
 import { ParseCourseUseCase } from '../usecases/parse-course.js';
 import { DownloadSubtitlesUseCase } from '../usecases/download-subtitles.js';
 import { SummarizeCourseUseCase } from '../usecases/summarize-course.js';

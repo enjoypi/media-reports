@@ -5,7 +5,7 @@
  */
 
 import { join } from 'node:path';
-import type { PathBuilder } from '../ports.js';
+import type { PathBuilder } from '../usecases/ports.js';
 import { sanitize } from '../lib/sanitize.js';
 
 export interface PathBuilderOptions {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @module cli/index
+ * @module frameworks/index
  * @description CLI 入口 — 注册子命令 + 向后兼容（直接传 URL 自动转发到 download）
  * @depends cli/download
  */

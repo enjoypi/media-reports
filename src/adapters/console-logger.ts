@@ -4,7 +4,7 @@
  * @layer Adapters
  */
 
-import type { Logger } from '../ports.js';
+import type { Logger } from '../usecases/ports.js';
 
 export class ConsoleLogger implements Logger {
   debug(message: string): void {

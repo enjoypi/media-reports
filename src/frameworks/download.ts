@@ -1,5 +1,5 @@
 /**
- * @module cli/download
+ * @module frameworks/download
  * @description download 子命令 — 使用 Clean Architecture 依赖注入
  * @layer Frameworks
  */
@@ -7,8 +7,8 @@
 import { join } from 'node:path';
 import { Command } from 'commander';
 import { createContainer, extractSpecSlug } from './container.js';
-import { DownloadStatus } from '../ports.js';
-import type { DownloadResult } from '../ports.js';
+import { DownloadStatus } from '../usecases/ports.js';
+import type { DownloadResult } from '../usecases/ports.js';
 import { error as logError } from '../adapters/logger.js';
 
 function hasAllFailed(results: DownloadResult[]): boolean {

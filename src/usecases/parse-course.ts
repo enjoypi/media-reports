@@ -8,8 +8,8 @@
  * - 不直接依赖任何外部实现（http-client, logger 等）
  */
 
-import type { Course } from '../ports.js';
-import type { CourseFetcher, SubtitleSource, Logger, RetryPolicy } from '../ports.js';
+import type { Course } from './ports.js';
+import type { CourseFetcher, SubtitleSource, Logger, RetryPolicy } from './ports.js';
 
 export interface ParseCourseInput {
   courseUrl: string;

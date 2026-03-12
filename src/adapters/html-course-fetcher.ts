@@ -5,7 +5,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../ports.js';
+import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../usecases/ports.js';
 
 interface NextDataModule {
   name: string;

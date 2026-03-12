@@ -4,7 +4,7 @@
  * @layer Adapters
  */
 
-import type { HttpClient } from '../ports.js';
+import type { HttpClient } from '../usecases/ports.js';
 
 export interface FetchHttpClientOptions {
   timeout: number;

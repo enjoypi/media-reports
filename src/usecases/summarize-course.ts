@@ -4,7 +4,7 @@
  * @layer Use Cases
  */
 
-import type { SubCourse, LlmClient, Logger, FileSystem, VttParser, DownloadResult, DownloadStatus } from '../ports.js';
+import type { SubCourse, LlmClient, Logger, FileSystem, VttParser, DownloadResult, DownloadStatus } from './ports.js';
 
 export interface SummarizeCourseInput {
   subCourse: SubCourse;

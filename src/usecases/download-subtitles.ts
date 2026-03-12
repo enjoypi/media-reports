@@ -4,8 +4,8 @@
  * @layer Use Cases
  */
 
-import type { Course, SubtitleMeta, DownloadResult, Logger, RetryPolicy, FileSystem, PathBuilder, HttpClient } from '../ports.js';
-import { DownloadStatus } from '../ports.js';
+import type { Course, SubtitleMeta, DownloadResult, Logger, RetryPolicy, FileSystem, PathBuilder, HttpClient } from './ports.js';
+import { DownloadStatus } from './ports.js';
 
 export interface DownloadSubtitlesInput {
   course: Course;

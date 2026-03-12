@@ -10,16 +10,16 @@
  * - CLI/Frameworks 层负责注入具体实现
  */
 
-import type { Course, SubtitleMeta } from './models/course.js';
-import type { ScannedCourse, SubCourse } from './models/course-scan.js';
+import type { Course, SubtitleMeta } from '../entities/course.js';
+import type { ScannedCourse, SubCourse } from '../entities/course-scan.js';
 
 // =============================================================================
 // Entity: 纯业务实体（已存在于 models/，此处不重复定义）
 // =============================================================================
 
-export type { Course, Week, Lesson, SubtitleMeta } from './models/course.js';
-export type { ScannedCourse, SubCourse, ScannedWeek, ScannedLesson } from './models/course-scan.js';
-export type { AppConfig, LlmConfig } from './models/config.js';
+export type { Course, Week, Lesson, SubtitleMeta } from '../entities/course.js';
+export type { ScannedCourse, SubCourse, ScannedWeek, ScannedLesson } from '../entities/course-scan.js';
+export type { AppConfig, LlmConfig } from '../entities/config.js';
 
 // =============================================================================
 // Ports: 用例层定义的外部依赖接口

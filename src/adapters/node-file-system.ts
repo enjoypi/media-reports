@@ -6,7 +6,7 @@
 
 import { existsSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import type { FileSystem } from '../ports.js';
+import type { FileSystem } from '../usecases/ports.js';
 
 export class NodeFileSystem implements FileSystem {
   exists(path: string): boolean {
