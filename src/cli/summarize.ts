@@ -1,17 +1,21 @@
 /**
  * @module cli/summarize
- * @description summarize 子命令 — 读取 VTT 字幕并生成课程总结
- * @depends services/course-scanner, services/summarizer, lib/llm-client, lib/config-loader
+ * @description summarize 子命令 — 使用 Clean Architecture 依赖注入
+ * @layer Frameworks
  */
 
 import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { Command } from 'commander';
-import { loadConfig } from '../lib/config-loader.js';
-import { createLlmClient } from '../lib/llm-client.js';
-import { scanCourse } from '../services/course-scanner.js';
-import { summarizeSubCourse } from '../services/summarizer.js';
-import { info, error as logError } from '../lib/logger.js';
+import { createContainer } from './container.js';
+import { error as logError } from '../lib/logger.js';
+
+const DEFAULT_PROMPT = `请基于以下课程字幕内容，生成一份完整、连贯、结构化的课程学习笔记。
+要求：
+- 提取关键概念、重要定义、核心论点
+- 按主题组织内容，消除重复
+- 使用 Markdown 格式，层次分明
+- 保留重要的专业术语（英文原文）`;
 
 export function registerSummarize(program: Command): void {
   program
@@ -22,45 +26,51 @@ export function registerSummarize(program: Command): void {
     .option('-o, --output <dir>', '输出目录')
     .option('-f, --force', '覆盖已存在的总结文档', false)
     .action(async (coursePaths: string[], opts: { config?: string; output?: string; force?: boolean }) => {
-      try {
-        const config = loadConfig(opts.config);
-        const client = createLlmClient(config.llm);
-        const failures: string[] = [];
+      const container = createContainer(opts.config);
+      const config = container.config;
+      const failures: string[] = [];
 
-        for (const cp of coursePaths) {
-          const absPath = resolve(cp);
-          try {
-            if (!existsSync(absPath)) {
-              throw new Error(`目录不存在: ${absPath}`);
-            }
-            const course = scanCourse(absPath);
-            info(`课程类型: ${course.type}，包含 ${course.subCourses.length} 个子课程`);
+      const systemPrompt = config.summarize.prompt?.trim() || DEFAULT_PROMPT;
+      if (!config.summarize.prompt?.trim()) {
+        container.logger.info('未配置自定义 Prompt，使用默认 Prompt');
+      }
 
-            for (const sc of course.subCourses) {
-              const outDir = opts.output ? resolve(opts.output) : undefined;
-              const summaryPath = resolve(outDir ?? sc.path, 'summary.md');
-
-              if (!opts.force && existsSync(summaryPath)) {
-                info(`跳过（已存在）: ${summaryPath}，使用 --force 覆盖`);
-                continue;
-              }
-              await summarizeSubCourse(client, config, sc, { outputDir: outDir });
-            }
-          } catch (err) {
-            logError(`课程处理失败 [${absPath}]: ${(err as Error).message}`);
-            failures.push(absPath);
+      for (const cp of coursePaths) {
+        const absPath = resolve(cp);
+        try {
+          if (!existsSync(absPath)) {
+            throw new Error(`目录不存在: ${absPath}`);
           }
-        }
 
-        if (failures.length > 0) {
-          logError(`\n${failures.length} 个课程处理失败:`);
-          failures.forEach((f) => logError(`  - ${f}`));
-          process.exit(1);
+          const course = container.courseScanner.scan(absPath);
+          container.logger.info(`课程类型: ${course.type}，包含 ${course.subCourses.length} 个子课程`);
+
+          for (const sc of course.subCourses) {
+            const outDir = opts.output ? resolve(opts.output) : undefined;
+            const summaryPath = resolve(outDir ?? sc.path, 'summary.md');
+
+            if (!opts.force && existsSync(summaryPath)) {
+              container.logger.info(`跳过（已存在）: ${summaryPath}，使用 --force 覆盖`);
+              continue;
+            }
+
+            await container.summarizeCourseUseCase.execute({
+              subCourse: sc,
+              outputDir: outDir ?? sc.path,
+              systemPrompt,
+            });
+          }
+        } catch (err) {
+          logError(`课程处理失败 [${absPath}]: ${(err as Error).message}`);
+          failures.push(absPath);
         }
-        info('全部完成');
-      } catch (err) {
-        logError((err as Error).message);
+      }
+
+      if (failures.length > 0) {
+        logError(`\n${failures.length} 个课程处理失败:`);
+        failures.forEach((f) => logError(`  - ${f}`));
         process.exit(1);
       }
+      container.logger.info('全部完成');
     });
 }

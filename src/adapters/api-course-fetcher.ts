@@ -1,0 +1,96 @@
+/**
+ * @module adapters/api-course-fetcher
+ * @description Coursera API 课程数据获取器
+ * @layer Adapters
+ */
+
+import type { Course, Week, Lesson, SubtitleMeta, CourseFetcher, HttpClient, Logger } from '../ports.js';
+
+interface LinkedModule { id: string; name: string; }
+interface LinkedLesson { id: string; itemIds: string[]; moduleId: string; }
+interface LinkedItem { id: string; name: string; contentSummary: { typeName: string }; }
+
+interface MaterialsResponse {
+  elements: { id: string; moduleIds?: string[] }[];
+  linked?: {
+    'onDemandCourseMaterialModules.v1'?: LinkedModule[];
+    'onDemandCourseMaterialLessons.v1'?: LinkedLesson[];
+    'onDemandCourseMaterialItems.v2'?: LinkedItem[];
+  };
+}
+
+export class ApiCourseFetcher implements CourseFetcher {
+  private readonly baseUrl = 'https://www.coursera.org';
+
+  constructor(
+    private httpClient: HttpClient,
+    private logger: Logger,
+  ) {}
+
+  async fetchBySlug(slug: string): Promise<Course | null> {
+    const url =
+      `${this.baseUrl}/api/onDemandCourseMaterials.v2/?q=slug&slug=${slug}` +
+      '&includes=modules,lessons,items' +
+      '&fields=moduleIds,' +
+      'onDemandCourseMaterialModules.v1(name,slug,lessonIds),' +
+      'onDemandCourseMaterialLessons.v1(name,slug,itemIds,moduleId),' +
+      'onDemandCourseMaterialItems.v2(name,slug,contentSummary,lessonId)';
+
+    const res = await this.httpClient.get(url);
+    if (res.status !== 200) return null;
+
+    let data: MaterialsResponse;
+    try {
+      data = JSON.parse(res.body);
+    } catch {
+      return null;
+    }
+
+    if (!data.elements?.length) return null;
+
+    const courseId = data.elements[0].id;
+    const linked = data.linked ?? {};
+    const modules = linked['onDemandCourseMaterialModules.v1'] ?? [];
+    const lessons = linked['onDemandCourseMaterialLessons.v1'] ?? [];
+    const items = linked['onDemandCourseMaterialItems.v2'] ?? [];
+
+    const itemMap = new Map(
+      items.filter((i) => i.contentSummary?.typeName === 'lecture').map((i) => [i.id, i]),
+    );
+
+    const weeks: Week[] = modules.map((mod, idx) => {
+      const weekLessons: Lesson[] = [];
+      for (const les of lessons.filter((l) => l.moduleId === mod.id)) {
+        for (const itemId of les.itemIds) {
+          const item = itemMap.get(itemId);
+          if (item) {
+            weekLessons.push({ title: item.name, videoId: `${courseId}~${item.id}`, subtitles: [] });
+          }
+        }
+      }
+      return { number: idx + 1, title: mod.name, lessons: weekLessons };
+    });
+
+    if (weeks.length === 0) {
+      weeks.push({ number: 1, title: 'Week 1', lessons: [] });
+    }
+
+    const courseName = await this.fetchName(slug);
+    return { slug, name: courseName || slug, url: `https://www.coursera.org/learn/${slug}`, weeks };
+  }
+
+  async fetchName(slug: string): Promise<string | null> {
+    const url = `${this.baseUrl}/api/courses.v1?q=slug&slug=${slug}&fields=name`;
+    try {
+      const res = await this.httpClient.get(url);
+      if (res.status === 200) {
+        const data = JSON.parse(res.body) as { elements?: { name?: string }[] };
+        const name = data.elements?.[0]?.name?.trim();
+        if (name) return name;
+      }
+    } catch {
+      // fallback
+    }
+    return null;
+  }
+}
