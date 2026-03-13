@@ -1,10 +1,10 @@
 /**
- * @module adapters/api-course-fetcher
- * @description API 课程数据获取器（Coursera 适配器）
+ * @module adapters/coursera/course-fetcher
+ * @description Coursera API 课程数据获取器
  * @layer Adapters
  */
 
-import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../usecases/ports.js';
+import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../../usecases/ports.js';
 
 interface LinkedModule { id: string; name: string; }
 interface LinkedLesson { id: string; itemIds: string[]; moduleId: string; }
@@ -19,15 +19,15 @@ interface MaterialsResponse {
   };
 }
 
-export interface ApiCourseFetcherOptions {
+export interface CourseFetcherOptions {
   baseUrl: string;
 }
 
-export class ApiCourseFetcher implements CourseFetcher {
+export class CourseraCourseFetcher implements CourseFetcher {
   constructor(
     private httpClient: HttpClient,
     private logger: Logger,
-    private options: ApiCourseFetcherOptions,
+    private options: CourseFetcherOptions,
   ) {}
 
   async fetchBySlug(slug: string): Promise<Course | null> {

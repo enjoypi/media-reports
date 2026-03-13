@@ -12,16 +12,16 @@ import { DownloadSubtitlesUseCase } from '../usecases/download-subtitles.js';
 import { SummarizeCourseUseCase } from '../usecases/summarize-course.js';
 import { FetchHttpClient } from '../adapters/fetch-http-client.js';
 import { ConsoleLogger } from '../adapters/console-logger.js';
-import { ApiCourseFetcher } from '../adapters/api-course-fetcher.js';
-import { ApiSubtitleSource } from '../adapters/api-subtitle-source.js';
+import { CourseraCourseFetcher } from '../adapters/coursera/course-fetcher.js';
+import { CourseraSubtitleSource } from '../adapters/coursera/subtitle-source.js';
 import { ExponentialRetryPolicy } from '../adapters/exponential-retry.js';
 import { NodeFileSystem } from '../adapters/node-file-system.js';
 import { DefaultPathBuilder } from '../adapters/path-builder.js';
 import { FileSystemCourseScanner } from '../adapters/fs-course-scanner.js';
 import { LibVttParser } from '../adapters/vtt-parser-adapter.js';
 import { OpenAiLlmClient } from '../adapters/openai-llm-client.js';
-import { HtmlCourseFetcher } from '../adapters/html-course-fetcher.js';
-import { ApiSpecializationFetcher, extractSpecSlug } from '../adapters/api-specialization-fetcher.js';
+import { CourseraHtmlCourseFetcher } from '../adapters/coursera/html-course-fetcher.js';
+import { CourseraSpecializationFetcher, extractSpecSlug } from '../adapters/coursera/specialization-fetcher.js';
 import { loadConfig } from './config-loader.js';
 import { loadCookies } from '../adapters/cookie-loader.js';
 
@@ -29,7 +29,7 @@ export interface Container {
   parseCourseUseCase: ParseCourseUseCase;
   downloadSubtitlesUseCase: DownloadSubtitlesUseCase;
   courseScanner: FileSystemCourseScanner;
-  specializationFetcher: ApiSpecializationFetcher;
+  specializationFetcher: CourseraSpecializationFetcher;
   httpClient: FetchHttpClient;
   config: AppConfig;
   logger: ConsoleLogger;
@@ -56,16 +56,16 @@ export function createContainer(explicitConfigPath?: string): Container {
   );
 
   // Adapters
-  const courseFetcher = new ApiCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
-  const subtitleSource = new ApiSubtitleSource(httpClient, { baseUrl: config.base_url });
+  const courseFetcher = new CourseraCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
+  const subtitleSource = new CourseraSubtitleSource(httpClient, { baseUrl: config.base_url });
   const fileSystem = new NodeFileSystem();
   const pathBuilder = new DefaultPathBuilder({ maxFilenameLength: config.max_filename_length });
   const courseScanner = new FileSystemCourseScanner();
   const vttParser = new LibVttParser({ emptyPlaceholder: config.empty_subtitle_placeholder });
-  const specializationFetcher = new ApiSpecializationFetcher(httpClient, logger, { baseUrl: config.base_url });
+  const specializationFetcher = new CourseraSpecializationFetcher(httpClient, logger, { baseUrl: config.base_url });
 
   // Use Cases (注入依赖)
-  const htmlCourseFetcher = new HtmlCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
+  const htmlCourseFetcher = new CourseraHtmlCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
   const parseCourseUseCase = new ParseCourseUseCase(
     courseFetcher,
     htmlCourseFetcher, // 备用 fetcher

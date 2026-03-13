@@ -1,11 +1,11 @@
 /**
- * @module adapters/html-course-fetcher
- * @description HTML 页面解析课程数据（API 失败时的备用方案）
+ * @module adapters/coursera/html-course-fetcher
+ * @description Coursera HTML 页面解析课程数据（API 失败时的备用方案）
  * @layer Adapters
  */
 
 import * as cheerio from 'cheerio';
-import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../usecases/ports.js';
+import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../../usecases/ports.js';
 
 interface NextDataModule {
   name: string;
@@ -21,7 +21,7 @@ export interface HtmlCourseFetcherOptions {
   baseUrl: string;
 }
 
-export class HtmlCourseFetcher implements CourseFetcher {
+export class CourseraHtmlCourseFetcher implements CourseFetcher {
   constructor(
     private httpClient: HttpClient,
     private logger: Logger,

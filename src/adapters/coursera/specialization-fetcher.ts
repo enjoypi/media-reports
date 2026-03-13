@@ -1,10 +1,10 @@
 /**
- * @module adapters/api-specialization-fetcher
- * @description API Specialization 数据获取器（Coursera 适配器）
+ * @module adapters/coursera/specialization-fetcher
+ * @description Coursera API Specialization 数据获取器
  * @layer Adapters
  */
 
-import type { SpecializationFetcher, HttpClient, Logger } from '../usecases/ports.js';
+import type { SpecializationFetcher, HttpClient, Logger } from '../../usecases/ports.js';
 
 interface SpecResponse {
   elements?: { name: string; courseIds: string[] }[];
@@ -14,15 +14,15 @@ interface CoursesResponse {
   elements?: { id: string; slug: string; name: string }[];
 }
 
-export interface ApiSpecializationFetcherOptions {
+export interface SpecializationFetcherOptions {
   baseUrl: string;
 }
 
-export class ApiSpecializationFetcher implements SpecializationFetcher {
+export class CourseraSpecializationFetcher implements SpecializationFetcher {
   constructor(
     private httpClient: HttpClient,
     private logger: Logger,
-    private options: ApiSpecializationFetcherOptions,
+    private options: SpecializationFetcherOptions,
   ) {}
 
   async fetchBySlug(slug: string): Promise<{ name: string; courses: Array<{ index: number; slug: string; name: string }> } | null> {

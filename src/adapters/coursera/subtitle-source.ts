@@ -1,10 +1,10 @@
 /**
- * @module adapters/api-subtitle-source
- * @description API 字幕数据源（Coursera 适配器）
+ * @module adapters/coursera/subtitle-source
+ * @description Coursera API 字幕数据源
  * @layer Adapters
  */
 
-import type { SubtitleMeta, SubtitleSource, HttpClient } from '../usecases/ports.js';
+import type { SubtitleMeta, SubtitleSource, HttpClient } from '../../usecases/ports.js';
 
 interface VideoResponse {
   elements: unknown[];
@@ -16,14 +16,14 @@ interface VideoResponse {
   };
 }
 
-export interface ApiSubtitleSourceOptions {
+export interface SubtitleSourceOptions {
   baseUrl: string;
 }
 
-export class ApiSubtitleSource implements SubtitleSource {
+export class CourseraSubtitleSource implements SubtitleSource {
   constructor(
     private httpClient: HttpClient,
-    private options: ApiSubtitleSourceOptions,
+    private options: SubtitleSourceOptions,
   ) {}
 
   async fetchForVideo(videoId: string): Promise<SubtitleMeta[]> {
