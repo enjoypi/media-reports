@@ -1,6 +1,6 @@
 /**
  * @module adapters/api-specialization-fetcher
- * @description Coursera API Specialization 数据获取器
+ * @description API Specialization 数据获取器（Coursera 适配器）
  * @layer Adapters
  */
 

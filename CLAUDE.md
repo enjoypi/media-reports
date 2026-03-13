@@ -8,7 +8,7 @@
 - Container 使用懒加载 getter（如 `getSummarizeUseCase()`），避免强制初始化未使用的依赖
 - `ports.ts` 重新导出实体类型：`export { Foo } from '../entities/foo.js'`，不重复定义
 - TypeScript ESM 模块，构建输出到 `dist/`
-- Adapter 接收外部配置通过 options 对象（如 `{ baseUrl: config.coursera_base_url }`）
+- Adapter 接收外部配置通过 options 对象（如 `{ baseUrl: config.base_url }`）
 
 ## Runtime
 - `download` 子命令：**不需要** LLM API key，只需要 `cookies.txt`
@@ -30,10 +30,10 @@
 ## Configuration
 - 本地配置：`./config.yaml`
 - 全局配置：`~/.media-summ/config.yaml`
-- 可配置项：`coursera_base_url`, `empty_subtitle_placeholder`, `llm.*`, `summarize.*`
+- 可配置项：`base_url`, `empty_subtitle_placeholder`, `llm.*`, `summarize.*`
 
 ## Prerequisites
-- `cookies.txt` - Netscape 格式 Cookie 文件，需从浏览器导出 Coursera 登录状态
+- `cookies.txt` - Netscape 格式 Cookie 文件，需从浏览器导出目标网站登录状态
 
 ## Dependencies
 - HTTP: `undici` (ProxyAgent)

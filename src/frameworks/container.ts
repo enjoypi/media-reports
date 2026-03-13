@@ -56,16 +56,16 @@ export function createContainer(explicitConfigPath?: string): Container {
   );
 
   // Adapters
-  const courseFetcher = new ApiCourseFetcher(httpClient, logger, { baseUrl: config.coursera_base_url });
-  const subtitleSource = new ApiSubtitleSource(httpClient, { baseUrl: config.coursera_base_url });
+  const courseFetcher = new ApiCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
+  const subtitleSource = new ApiSubtitleSource(httpClient, { baseUrl: config.base_url });
   const fileSystem = new NodeFileSystem();
   const pathBuilder = new DefaultPathBuilder({ maxFilenameLength: config.max_filename_length });
   const courseScanner = new FileSystemCourseScanner();
   const vttParser = new LibVttParser({ emptyPlaceholder: config.empty_subtitle_placeholder });
-  const specializationFetcher = new ApiSpecializationFetcher(httpClient, logger, { baseUrl: config.coursera_base_url });
+  const specializationFetcher = new ApiSpecializationFetcher(httpClient, logger, { baseUrl: config.base_url });
 
   // Use Cases (注入依赖)
-  const htmlCourseFetcher = new HtmlCourseFetcher(httpClient, logger, { baseUrl: config.coursera_base_url });
+  const htmlCourseFetcher = new HtmlCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
   const parseCourseUseCase = new ParseCourseUseCase(
     courseFetcher,
     htmlCourseFetcher, // 备用 fetcher

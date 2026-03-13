@@ -1,6 +1,6 @@
 /**
  * @module adapters/api-course-fetcher
- * @description Coursera API 课程数据获取器
+ * @description API 课程数据获取器（Coursera 适配器）
  * @layer Adapters
  */
 

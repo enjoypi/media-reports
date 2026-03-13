@@ -1,6 +1,6 @@
 /**
  * @module adapters/api-subtitle-source
- * @description Coursera API 字幕数据源
+ * @description API 字幕数据源（Coursera 适配器）
  * @layer Adapters
  */
 

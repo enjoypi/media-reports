@@ -27,8 +27,8 @@ function hasAllFailed(results: DownloadResult[]): boolean {
 export function registerDownload(program: Command): void {
   program
     .command('download')
-    .description('下载 Coursera 课程或 Specialization 的英文字幕')
-    .argument('<url>', 'Coursera 课程或 Specialization URL')
+    .description('下载在线课程字幕（支持 Coursera、Udemy 等）')
+    .argument('<url>', '课程或 Specialization URL')
     .option('-o, --output <dir>', '输出目录')
     .action(async (url: string, opts: { output?: string }) => {
       const container = createContainer();
@@ -58,18 +58,18 @@ export function registerDownload(program: Command): void {
         if (msg.includes('认证失败') || msg.includes('401')) {
           logError(
             '认证失败（Cookie 无效或已过期）。请重新导出 cookies.txt：\n' +
-            '1. 在浏览器中登录 Coursera\n' +
+            '1. 在浏览器中登录目标网站\n' +
             '2. 使用浏览器扩展导出 cookies.txt\n' +
-            '3. 确认已 Enroll 该课程',
+            '3. 确认已登录并有访问权限',
           );
           process.exit(2);
         }
         if (msg.includes('无权访问') || msg.includes('403')) {
           logError(
-            '无权访问（未 Enroll 或需要付费）。请确认：\n' +
-            '1. 在浏览器中登录 Coursera\n' +
+            '无权访问（需要登录或付费）。请确认：\n' +
+            '1. 在浏览器中登录目标网站\n' +
             '2. 使用浏览器扩展导出 cookies.txt\n' +
-            '3. 确认已 Enroll 该课程',
+            '3. 确认有访问权限',
           );
           process.exit(2);
         }
@@ -100,7 +100,7 @@ async function handleSpecialization(
 
     try {
       const course = await container.parseCourseUseCase.execute({
-        courseUrl: `${config.coursera_base_url}/learn/${c.slug}`,
+        courseUrl: `${config.base_url}/learn/${c.slug}`,
       });
       const results = await container.downloadSubtitlesUseCase.execute({
         course,

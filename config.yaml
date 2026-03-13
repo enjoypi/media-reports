@@ -1,4 +1,4 @@
-# Coursera 字幕下载器配置文件
+# media-summ 配置文件
 # 复制为 config.yaml 并按需修改
 
 output_dir: ./subtitles
@@ -10,7 +10,7 @@ preferred_lang: en
 max_filename_length: 200
 retry_base_ms: 1000
 user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-coursera_base_url: https://www.coursera.org
+base_url: https://www.coursera.org
 empty_subtitle_placeholder: "[字幕内容为空]"
 
 # LLM 配置（兼容 OpenAI 格式的 API）

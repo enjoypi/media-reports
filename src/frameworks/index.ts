@@ -14,7 +14,7 @@ const program = new Command();
 
 program
   .name('media-summ')
-  .description('Coursera 课程英文字幕批量下载工具')
+  .description('在线课程字幕下载与总结工具')
   .version('1.0.0');
 
 registerDownload(program);
