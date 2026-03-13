@@ -5,7 +5,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../../usecases/ports.js';
+import type { Course, Week, Lesson, CourseFetcher, HttpClient } from '../../usecases/ports.js';
 
 interface NextDataModule {
   name: string;
@@ -24,7 +24,6 @@ export interface HtmlCourseFetcherOptions {
 export class CourseraHtmlCourseFetcher implements CourseFetcher {
   constructor(
     private httpClient: HttpClient,
-    private logger: Logger,
     private options: HtmlCourseFetcherOptions,
   ) {}
 

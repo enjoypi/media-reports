@@ -4,7 +4,7 @@
  * @layer Adapters
  */
 
-import type { SpecializationFetcher, HttpClient, Logger } from '../../usecases/ports.js';
+import type { SpecializationFetcher, HttpClient } from '../../usecases/ports.js';
 
 interface SpecResponse {
   elements?: { name: string; courseIds: string[] }[];
@@ -21,7 +21,6 @@ export interface SpecializationFetcherOptions {
 export class CourseraSpecializationFetcher implements SpecializationFetcher {
   constructor(
     private httpClient: HttpClient,
-    private logger: Logger,
     private options: SpecializationFetcherOptions,
   ) {}
 

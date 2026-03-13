@@ -6,15 +6,12 @@
 
 import OpenAI from 'openai';
 import { ProxyAgent } from 'undici';
-import type { LlmClient, LlmConfig, Logger } from '../usecases/ports.js';
+import type { LlmClient, LlmConfig } from '../usecases/ports.js';
 
 export class OpenAiLlmClient implements LlmClient {
   private client: OpenAI;
 
-  constructor(
-    private config: LlmConfig,
-    private logger: Logger,
-  ) {
+  constructor(private config: LlmConfig) {
     if (!config.api_key) throw new Error('LLM 配置错误: api_key 未设置');
     if (!config.base_url) throw new Error('LLM 配置错误: base_url 未设置');
 

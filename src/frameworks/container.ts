@@ -66,16 +66,16 @@ export function createContainer(explicitConfigPath?: string): Container {
   );
 
   // Adapters
-  const courseFetcher = new CourseraCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
+  const courseFetcher = new CourseraCourseFetcher(httpClient, { baseUrl: config.base_url });
   const subtitleSource = new CourseraSubtitleSource(httpClient, { baseUrl: config.base_url });
   const fileSystem = new NodeFileSystem();
   const pathBuilder = new DefaultPathBuilder({ maxFilenameLength: config.max_filename_length });
   const courseScanner = new FileSystemCourseScanner();
   const vttParser = new LibVttParser({ emptyPlaceholder: config.empty_subtitle_placeholder });
-  const specializationFetcher = new CourseraSpecializationFetcher(httpClient, logger, { baseUrl: config.base_url });
+  const specializationFetcher = new CourseraSpecializationFetcher(httpClient, { baseUrl: config.base_url });
 
   // Use Cases (注入依赖)
-  const htmlCourseFetcher = new CourseraHtmlCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
+  const htmlCourseFetcher = new CourseraHtmlCourseFetcher(httpClient, { baseUrl: config.base_url });
   const parseCourseUseCase = new ParseCourseUseCase(
     courseFetcher,
     htmlCourseFetcher, // 备用 fetcher
@@ -95,7 +95,7 @@ export function createContainer(explicitConfigPath?: string): Container {
 
   // 延迟创建 LLM 相关依赖（仅 summarize 子命令需要）
   const getSummarizeUseCase = (): SummarizeCourseUseCase => {
-    const llmClient = new OpenAiLlmClient(config.llm, logger);
+    const llmClient = new OpenAiLlmClient(config.llm);
     return new SummarizeCourseUseCase(llmClient, vttParser, fileSystem, logger);
   };
 

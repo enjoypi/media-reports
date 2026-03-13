@@ -4,6 +4,7 @@
  * @layer Use Cases
  */
 
+import pLimit from 'p-limit';
 import type { Course, SubtitleMeta, DownloadResult, Logger, RetryPolicy, FileSystem, PathBuilder, HttpClient } from './ports.js';
 import { DownloadStatus } from './ports.js';
 
@@ -12,7 +13,6 @@ export interface DownloadSubtitlesInput {
   preferredLang: string;
   outputDir: string;
   concurrency: number;
-  flat?: boolean;
 }
 
 interface DownloadTask {
@@ -47,17 +47,20 @@ export class DownloadSubtitlesUseCase {
       return [];
     }
 
-    const results: DownloadResult[] = [];
-    const counts = { success: 0, skipped: 0, failed: 0 };
+    const limit = pLimit(input.concurrency);
+    const results = await Promise.all(
+      tasks.map((task) => limit(() => this.downloadOne(task, input)))
+    );
 
-    for (const task of tasks) {
-      const result = await this.downloadOne(task, input);
-      results.push(result);
-
-      if (result.status === DownloadStatus.Success) counts.success++;
-      else if (result.status === DownloadStatus.Skipped) counts.skipped++;
-      else counts.failed++;
-    }
+    const counts = results.reduce(
+      (acc, r) => {
+        if (r.status === DownloadStatus.Success) acc.success++;
+        else if (r.status === DownloadStatus.Skipped) acc.skipped++;
+        else acc.failed++;
+        return acc;
+      },
+      { success: 0, skipped: 0, failed: 0 }
+    );
 
     this.logger.info(`完成: ${counts.success} 成功, ${counts.skipped} 跳过, ${counts.failed} 失败`);
     return results;

@@ -66,8 +66,17 @@ subtitles/
 - **目录名**：`{sanitized-course-name}/` 或 `{sanitized-spec-name}/{index}-{sanitized-course-name}/`
 - **文件名**：`{week}-{index}-{sanitized-lesson-title}.{format}`
 
+## Code Quality
+- 检查未使用代码：`npx tsc --noEmit --noUnusedLocals --noUnusedParameters`
+- 并发控制使用 `p-limit`（已在依赖中）
+
+## Common Patterns
+- Adapters 常注入 `logger` 但未使用，优化时需检查实际调用
+- 测试文件与源码同目录：`src/**/*.test.ts`
+
 ## Dependencies
 - HTTP: `undici` (ProxyAgent)
 - Parsing: `cheerio`, `@plussub/srt-vtt-parser`
 - CLI: `commander`
 - Config: `yaml`, `.env` 文件
+- Concurrency: `p-limit`

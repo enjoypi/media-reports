@@ -4,7 +4,7 @@
  * @layer Adapters
  */
 
-import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../../usecases/ports.js';
+import type { Course, Week, Lesson, CourseFetcher, HttpClient } from '../../usecases/ports.js';
 
 interface LinkedModule { id: string; name: string; }
 interface LinkedLesson { id: string; itemIds: string[]; moduleId: string; }
@@ -26,7 +26,6 @@ export interface CourseFetcherOptions {
 export class CourseraCourseFetcher implements CourseFetcher {
   constructor(
     private httpClient: HttpClient,
-    private logger: Logger,
     private options: CourseFetcherOptions,
   ) {}
 
