@@ -22,25 +22,25 @@ import { LibVttParser } from '../adapters/vtt-parser-adapter.js';
 import { OpenAiLlmClient } from '../adapters/openai-llm-client.js';
 import { HtmlCourseFetcher } from '../adapters/html-course-fetcher.js';
 import { ApiSpecializationFetcher, extractSpecSlug } from '../adapters/api-specialization-fetcher.js';
-import { loadConfig } from '../lib/config-loader.js';
+import { loadConfig } from './config-loader.js';
 import { loadCookies } from '../adapters/cookie-loader.js';
 
 export interface Container {
   parseCourseUseCase: ParseCourseUseCase;
   downloadSubtitlesUseCase: DownloadSubtitlesUseCase;
-  summarizeCourseUseCase: SummarizeCourseUseCase;
   courseScanner: FileSystemCourseScanner;
   specializationFetcher: ApiSpecializationFetcher;
   httpClient: FetchHttpClient;
   config: AppConfig;
   logger: ConsoleLogger;
+  getSummarizeUseCase(): SummarizeCourseUseCase;
 }
 
 export { extractSpecSlug };
 
 export function createContainer(explicitConfigPath?: string): Container {
-  const config = loadConfig(explicitConfigPath);
   const logger = new ConsoleLogger();
+  const config = loadConfig(explicitConfigPath, logger);
 
   // 基础设施
   const cookieJar = loadCookies(config.cookies_file);
@@ -82,22 +82,20 @@ export function createContainer(explicitConfigPath?: string): Container {
     logger,
   );
 
-  const llmClient = new OpenAiLlmClient(config.llm, logger);
-  const summarizeCourseUseCase = new SummarizeCourseUseCase(
-    llmClient,
-    vttParser,
-    fileSystem,
-    logger,
-  );
+  // 延迟创建 LLM 相关依赖（仅 summarize 子命令需要）
+  const getSummarizeUseCase = (): SummarizeCourseUseCase => {
+    const llmClient = new OpenAiLlmClient(config.llm, logger);
+    return new SummarizeCourseUseCase(llmClient, vttParser, fileSystem, logger);
+  };
 
   return {
     parseCourseUseCase,
     downloadSubtitlesUseCase,
-    summarizeCourseUseCase,
     courseScanner,
     specializationFetcher,
     httpClient,
     config,
     logger,
+    getSummarizeUseCase,
   };
 }

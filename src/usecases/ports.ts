@@ -14,12 +14,14 @@ import type { Course, SubtitleMeta } from '../entities/course.js';
 import type { ScannedCourse, SubCourse } from '../entities/course-scan.js';
 
 // =============================================================================
-// Entity: 纯业务实体（已存在于 models/，此处不重复定义）
+// Entity: 纯业务实体（重新导出，统一入口）
 // =============================================================================
 
 export type { Course, Week, Lesson, SubtitleMeta } from '../entities/course.js';
 export type { ScannedCourse, SubCourse, ScannedWeek, ScannedLesson } from '../entities/course-scan.js';
 export type { AppConfig, LlmConfig } from '../entities/config.js';
+export { DownloadStatus } from '../entities/download-result.js';
+export type { DownloadResult } from '../entities/download-result.js';
 
 // =============================================================================
 // Ports: 用例层定义的外部依赖接口
@@ -111,19 +113,6 @@ export interface RetryPolicy {
 // =============================================================================
 // Use Case 结果类型
 // =============================================================================
-
-export enum DownloadStatus {
-  Success = 'success',
-  Skipped = 'skipped',
-  Failed = 'failed',
-}
-
-export interface DownloadResult {
-  lesson: string;
-  status: DownloadStatus;
-  reason?: string;
-  filePath?: string;
-}
 
 export interface SummarizeResult {
   subCourseName: string;

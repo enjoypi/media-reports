@@ -6,7 +6,7 @@
 
 import { join } from 'node:path';
 import type { PathBuilder } from '../usecases/ports.js';
-import { sanitize } from '../lib/sanitize.js';
+import { sanitize } from '../entities/sanitize.js';
 
 export interface PathBuilderOptions {
   maxFilenameLength: number;

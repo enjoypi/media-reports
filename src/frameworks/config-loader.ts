@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { parse } from 'yaml';
 import { AppConfig, DEFAULT_CONFIG } from '../entities/config.js';
-import { info } from '../adapters/logger.js';
+import type { Logger } from '../usecases/ports.js';
 
 const CONFIG_FILENAME = 'config.yaml';
 const CONFIG_PATHS = [
@@ -32,8 +32,8 @@ function applyEnvOverrides(config: AppConfig): void {
   if (process.env['LLM_MODEL']) config.llm.model = process.env['LLM_MODEL'];
 }
 
-function readAndMerge(p: string): AppConfig {
-  info(`加载配置: ${p}`);
+function readAndMerge(p: string, logger?: Logger): AppConfig {
+  logger?.info(`加载配置: ${p}`);
   const raw = readFileSync(p, 'utf-8');
   const parsed = parse(raw) as Partial<AppConfig> | null;
   return {
@@ -44,16 +44,16 @@ function readAndMerge(p: string): AppConfig {
   };
 }
 
-export function loadConfig(explicitPath?: string): AppConfig {
+export function loadConfig(explicitPath?: string, logger?: Logger): AppConfig {
   loadDotEnv();
   let config: AppConfig;
   if (explicitPath) {
     if (!existsSync(explicitPath)) throw new Error(`配置文件不存在: ${explicitPath}`);
-    config = readAndMerge(explicitPath);
+    config = readAndMerge(explicitPath, logger);
   } else {
     const found = CONFIG_PATHS.find((p) => existsSync(p));
-    config = found ? readAndMerge(found) : structuredClone(DEFAULT_CONFIG);
-    if (!found) info('未找到配置文件，使用默认配置');
+    config = found ? readAndMerge(found, logger) : structuredClone(DEFAULT_CONFIG);
+    if (!found) logger?.info('未找到配置文件，使用默认配置');
   }
   applyEnvOverrides(config);
   return config;

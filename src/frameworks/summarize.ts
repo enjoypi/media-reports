@@ -54,7 +54,7 @@ export function registerSummarize(program: Command): void {
               continue;
             }
 
-            await container.summarizeCourseUseCase.execute({
+            await container.getSummarizeUseCase().execute({
               subCourse: sc,
               outputDir: outDir ?? sc.path,
               systemPrompt,
