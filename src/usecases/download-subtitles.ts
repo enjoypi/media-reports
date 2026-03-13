@@ -17,6 +17,7 @@ export interface DownloadSubtitlesInput {
 
 interface DownloadTask {
   weekNumber: number;
+  lessonIndex: number;
   lessonTitle: string;
   subtitleUrl: string;
   format: string;
@@ -71,6 +72,7 @@ export class DownloadSubtitlesUseCase {
         if (sub) {
           tasks.push({
             weekNumber: week.number,
+            lessonIndex: lesson.index,
             lessonTitle: lesson.title,
             subtitleUrl: sub.url,
             format: sub.format,
@@ -98,6 +100,7 @@ export class DownloadSubtitlesUseCase {
       input.outputDir,
       input.course.name,
       task.weekNumber,
+      task.lessonIndex,
       task.lessonTitle,
       task.format,
     );

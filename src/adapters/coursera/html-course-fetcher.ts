@@ -60,7 +60,7 @@ export class CourseraHtmlCourseFetcher implements CourseFetcher {
     const weeks: Week[] = modules.map((mod, idx) => {
       const lessons: Lesson[] = (mod.items ?? [])
         .filter((item) => item.typeName === 'lecture' || item.content?.subtitles)
-        .map((item) => ({
+        .map((item, lessonIdx) => ({
           title: item.name,
           videoId: item.id,
           subtitles: item.content?.subtitles
@@ -70,6 +70,7 @@ export class CourseraHtmlCourseFetcher implements CourseFetcher {
                 url: subtitleUrl,
               }))
             : [],
+          index: lessonIdx + 1,
         }));
       return { number: idx + 1, title: mod.name, lessons };
     });

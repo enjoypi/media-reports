@@ -12,8 +12,6 @@ export interface SummarizeConfig {
 }
 
 export interface RateLimitConfig {
-  default_concurrency: number;
-  domain_concurrency: Record<string, number>;
   default_requests_per_minute: number;
   domain_requests_per_minute: Record<string, number>;
 }
@@ -49,13 +47,9 @@ export const DEFAULT_CONFIG: AppConfig = {
   base_url: 'https://www.coursera.org',
   empty_subtitle_placeholder: '[字幕内容为空]',
   rate_limit: {
-    default_concurrency: 3,
-    domain_concurrency: {
-      'www.coursera.org': 2,
-    },
     default_requests_per_minute: 30,
     domain_requests_per_minute: {
-      'www.coursera.org': 20,
+      'www.coursera.org': 50,
     },
   },
   llm: {

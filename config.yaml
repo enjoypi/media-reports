@@ -13,15 +13,11 @@ user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 
 base_url: https://www.coursera.org
 empty_subtitle_placeholder: "[字幕内容为空]"
 
-# 流控配置（按域名限制并发和速率）
+# 流控配置（按域名限制 RPM = Requests Per Minute）
 rate_limit:
-  default_concurrency: 3
-  domain_concurrency:
-    www.coursera.org: 2
-  # 每分钟请求数限制（RPM = Requests Per Minute）
   default_requests_per_minute: 30
   domain_requests_per_minute:
-    www.coursera.org: 20
+    www.coursera.org: 50
 
 # LLM 配置（兼容 OpenAI 格式的 API）
 # api_key 优先从环境变量 LLM_API_KEY 读取（支持 .env 文件）

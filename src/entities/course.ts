@@ -8,6 +8,7 @@ export interface Lesson {
   title: string;
   videoId: string;
   subtitles: SubtitleMeta[];
+  index: number;
 }
 
 export interface Week {

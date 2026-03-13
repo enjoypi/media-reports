@@ -79,7 +79,7 @@ export interface FileSystem {
  * 路径构建器
  */
 export interface PathBuilder {
-  build(outputDir: string, courseName: string, weekNumber: number, lessonTitle: string, format: string): string;
+  build(outputDir: string, courseName: string, weekNumber: number, lessonIndex: number, lessonTitle: string, format: string): string;
 }
 
 /**

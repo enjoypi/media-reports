@@ -59,8 +59,6 @@ export function createContainer(explicitConfigPath?: string): Container {
   // 域名限流器
   const rateLimiter = new DomainRateLimiter(
     {
-      defaultConcurrency: config.rate_limit.default_concurrency,
-      domainConcurrency: config.rate_limit.domain_concurrency,
       defaultRequestsPerMinute: config.rate_limit.default_requests_per_minute,
       domainRequestsPerMinute: config.rate_limit.domain_requests_per_minute,
     },

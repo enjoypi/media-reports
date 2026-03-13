@@ -19,12 +19,13 @@ export class DefaultPathBuilder implements PathBuilder {
     outputDir: string,
     courseName: string,
     weekNumber: number,
+    lessonIndex: number,
     lessonTitle: string,
     format: string,
   ): string {
     const safeCourse = sanitize(courseName, this.options.maxFilenameLength);
     const safeLesson = sanitize(lessonTitle, this.options.maxFilenameLength);
-    const filename = `${weekNumber.toString().padStart(2, '0')} - ${safeLesson}.${format}`;
+    const filename = `${weekNumber.toString().padStart(2, '0')}-${lessonIndex.toString().padStart(2, '0')}-${safeLesson}.${format}`;
     return join(outputDir, safeCourse, filename);
   }
 }

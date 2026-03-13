@@ -67,7 +67,12 @@ export class CourseraCourseFetcher implements CourseFetcher {
         for (const itemId of les.itemIds) {
           const item = itemMap.get(itemId);
           if (item) {
-            weekLessons.push({ title: item.name, videoId: `${courseId}~${item.id}`, subtitles: [] });
+            weekLessons.push({
+              title: item.name,
+              videoId: `${courseId}~${item.id}`,
+              subtitles: [],
+              index: weekLessons.length + 1,
+            });
           }
         }
       }
