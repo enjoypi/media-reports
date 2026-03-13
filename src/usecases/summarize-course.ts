@@ -41,9 +41,7 @@ export class SummarizeCourseUseCase {
   }
 
   private resolveOutputPath(input: SummarizeCourseInput): string {
-    // 简化路径处理，实际应使用路径库
-    const dir = input.outputDir || input.subCourse.path;
-    return `${dir}/summary.md`;
+    return `${input.outputDir || input.subCourse.path}/summary.md`;
   }
 
   private buildFullContent(subCourse: SubCourse): string {

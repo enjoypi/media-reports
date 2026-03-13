@@ -110,11 +110,3 @@ export interface RetryPolicy {
   execute<T>(operation: () => Promise<T>, label: string): Promise<T>;
 }
 
-// =============================================================================
-// Use Case 结果类型
-// =============================================================================
-
-export interface SummarizeResult {
-  subCourseName: string;
-  outputPath: string;
-}

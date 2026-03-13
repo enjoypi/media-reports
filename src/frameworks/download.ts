@@ -24,6 +24,10 @@ function hasAllFailed(results: DownloadResult[]): boolean {
   return results.length > 0 && results.every((r) => r.status === DownloadStatus.Failed);
 }
 
+function isAuthError(msg: string): boolean {
+  return msg.includes('认证失败') || msg.includes('无权访问');
+}
+
 export function registerDownload(program: Command): void {
   program
     .command('download')
@@ -110,8 +114,7 @@ async function handleSpecialization(
       });
       if (hasAllFailed(results)) totalFailed++;
     } catch (err) {
-      const msg = (err as Error).message;
-      if (msg.includes('认证失败') || msg.includes('无权访问')) {
+      if (isAuthError((err as Error).message)) {
         container.logger.error(`跳过 ${c.name}: 需要认证或付费`);
         totalFailed++;
       } else {

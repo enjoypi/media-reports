@@ -9,13 +9,20 @@
 import { Command } from 'commander';
 import { registerDownload } from './download.js';
 import { registerSummarize } from './summarize.js';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const pkg = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
 
 const program = new Command();
 
 program
   .name('media-summ')
   .description('在线课程字幕下载与总结工具')
-  .version('1.0.0');
+  .version(pkg.version);
 
 registerDownload(program);
 registerSummarize(program);
