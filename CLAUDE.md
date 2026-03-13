@@ -30,7 +30,8 @@
 ## Configuration
 - 本地配置：`./config.yaml`
 - 全局配置：`~/.media-summ/config.yaml`
-- 可配置项：`base_url`, `empty_subtitle_placeholder`, `llm.*`, `summarize.*`
+- 可配置项：`base_url`, `empty_subtitle_placeholder`, `rate_limit.*`, `llm.*`, `summarize.*`
+- 流控配置：`rate_limit.default_concurrency`, `rate_limit.domain_concurrency`, `rate_limit.default_requests_per_minute`, `rate_limit.domain_requests_per_minute`
 
 ## Prerequisites
 - `cookies.txt` - Netscape 格式 Cookie 文件，需从浏览器导出目标网站登录状态

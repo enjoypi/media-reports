@@ -22,6 +22,7 @@ import { LibVttParser } from '../adapters/vtt-parser-adapter.js';
 import { OpenAiLlmClient } from '../adapters/openai-llm-client.js';
 import { CourseraHtmlCourseFetcher } from '../adapters/coursera/html-course-fetcher.js';
 import { CourseraSpecializationFetcher, extractSpecSlug } from '../adapters/coursera/specialization-fetcher.js';
+import { DomainRateLimiter } from '../adapters/domain-rate-limiter.js';
 import { loadConfig } from './config-loader.js';
 import { loadCookies } from '../adapters/cookie-loader.js';
 
@@ -55,6 +56,17 @@ export function createContainer(explicitConfigPath?: string): Container {
     logger,
   );
 
+  // 域名限流器
+  const rateLimiter = new DomainRateLimiter(
+    {
+      defaultConcurrency: config.rate_limit.default_concurrency,
+      domainConcurrency: config.rate_limit.domain_concurrency,
+      defaultRequestsPerMinute: config.rate_limit.default_requests_per_minute,
+      domainRequestsPerMinute: config.rate_limit.domain_requests_per_minute,
+    },
+    logger,
+  );
+
   // Adapters
   const courseFetcher = new CourseraCourseFetcher(httpClient, logger, { baseUrl: config.base_url });
   const subtitleSource = new CourseraSubtitleSource(httpClient, { baseUrl: config.base_url });
@@ -79,6 +91,7 @@ export function createContainer(explicitConfigPath?: string): Container {
     fileSystem,
     pathBuilder,
     retryPolicy,
+    rateLimiter,
     logger,
   );
 

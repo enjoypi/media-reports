@@ -41,6 +41,18 @@ function readAndMerge(p: string, logger?: Logger): AppConfig {
     ...parsed,
     llm: { ...DEFAULT_CONFIG.llm, ...(parsed?.llm ?? {}) },
     summarize: { ...DEFAULT_CONFIG.summarize, ...(parsed?.summarize ?? {}) },
+    rate_limit: {
+      ...DEFAULT_CONFIG.rate_limit,
+      ...(parsed?.rate_limit ?? {}),
+      domain_concurrency: {
+        ...DEFAULT_CONFIG.rate_limit.domain_concurrency,
+        ...(parsed?.rate_limit?.domain_concurrency ?? {}),
+      },
+      domain_requests_per_minute: {
+        ...DEFAULT_CONFIG.rate_limit.domain_requests_per_minute,
+        ...(parsed?.rate_limit?.domain_requests_per_minute ?? {}),
+      },
+    },
   };
 }
 

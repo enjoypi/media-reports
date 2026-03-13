@@ -24,12 +24,17 @@ interface DownloadTask {
   total: number;
 }
 
+export interface RateLimiter {
+  acquire(url: string): Promise<() => void>;
+}
+
 export class DownloadSubtitlesUseCase {
   constructor(
     private httpClient: HttpClient,
     private fileSystem: FileSystem,
     private pathBuilder: PathBuilder,
     private retryPolicy: RetryPolicy,
+    private rateLimiter: RateLimiter,
     private logger: Logger,
   ) {}
 
@@ -104,6 +109,9 @@ export class DownloadSubtitlesUseCase {
       return { lesson: task.lessonTitle, status: DownloadStatus.Skipped, reason: '已存在', filePath };
     }
 
+    // 获取域名限流锁
+    const release = await this.rateLimiter.acquire(task.subtitleUrl);
+
     try {
       const content = await this.retryPolicy.execute(async () => {
         const res = await this.httpClient.get(task.subtitleUrl);
@@ -117,6 +125,8 @@ export class DownloadSubtitlesUseCase {
     } catch (err) {
       this.logger.error(`${label} ... failed (${(err as Error).message})`);
       return { lesson: task.lessonTitle, status: DownloadStatus.Failed, reason: (err as Error).message };
+    } finally {
+      release();
     }
   }
 }
