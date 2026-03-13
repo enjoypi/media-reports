@@ -38,19 +38,19 @@ export class DomainRateLimiter {
   async acquire(url: string): Promise<() => void> {
     const domain = this.extractDomain(url);
     const state = this.getOrCreateState(domain);
+    const rpm = this.getRequestsPerMinute(domain);
+
+    // 应用随机延迟（在获取锁之前，避免阻塞其他请求）
+    await this.applyRandomDelay(rpm);
 
     // 获取互斥锁
     await this.lock(state);
 
     try {
       const concurrency = this.getConcurrency(domain);
-      const rpm = this.getRequestsPerMinute(domain);
 
       // 检查速率限制
       await this.checkRateLimit(domain, state, rpm);
-
-      // 应用基于RPM的随机延迟
-      await this.applyRandomDelay(rpm);
 
       if (state.available > 0) {
         // 有可用许可
