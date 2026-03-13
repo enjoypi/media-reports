@@ -11,6 +11,15 @@ import { DownloadStatus } from '../usecases/ports.js';
 import type { DownloadResult } from '../usecases/ports.js';
 import { error as logError } from '../adapters/logger.js';
 
+function extractSiteName(url: string): string {
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname.replace(/^www\./, '') || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
 function hasAllFailed(results: DownloadResult[]): boolean {
   return results.length > 0 && results.every((r) => r.status === DownloadStatus.Failed);
 }
@@ -27,15 +36,17 @@ export function registerDownload(program: Command): void {
       if (opts.output) config.output_dir = opts.output;
 
       try {
+        const siteName = extractSiteName(url);
+        const baseOutputDir = join(config.output_dir, siteName);
         const specSlug = extractSpecSlug(url);
         if (specSlug) {
-          await handleSpecialization(specSlug, container);
+          await handleSpecialization(specSlug, container, baseOutputDir);
         } else {
           const course = await container.parseCourseUseCase.execute({ courseUrl: url });
           const results = await container.downloadSubtitlesUseCase.execute({
             course,
             preferredLang: config.preferred_lang,
-            outputDir: config.output_dir,
+            outputDir: baseOutputDir,
             concurrency: config.concurrency,
           });
           process.exit(hasAllFailed(results) ? 3 : 0);
@@ -71,6 +82,7 @@ export function registerDownload(program: Command): void {
 async function handleSpecialization(
   slug: string,
   container: ReturnType<typeof createContainer>,
+  baseOutputDir: string,
 ): Promise<void> {
   const config = container.config;
   container.logger.info(`解析 Specialization: ${slug}`);
@@ -83,7 +95,7 @@ async function handleSpecialization(
 
   for (const c of spec.courses) {
     const prefix = String(c.index).padStart(2, '0');
-    const courseOutputDir = join(config.output_dir, spec.name, `${prefix} - ${c.name}`);
+    const courseOutputDir = join(baseOutputDir, spec.name, `${prefix} - ${c.name}`);
     container.logger.info(`\n[${c.index}/${spec.courses.length}] ${c.name}`);
 
     try {

@@ -13,7 +13,7 @@
 ## Runtime
 - `download` 子命令：**不需要** LLM API key，只需要 `cookies.txt`
 - `summarize` 子命令：需要配置 `llm.api_key`
-- 字幕下载到 `./downloads/<specialization>/<course>/`
+- 字幕下载到 `./subtitles/<website-domain>/<specialization>/<course>/`
 
 ## Environment
 - `LLM_API_KEY` - LLM API 密钥（summarize 子命令必需）

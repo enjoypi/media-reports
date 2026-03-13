@@ -28,7 +28,7 @@ export interface AppConfig {
 }
 
 export const DEFAULT_CONFIG: AppConfig = {
-  output_dir: './downloads',
+  output_dir: './subtitles',
   cookies_file: './cookies.txt',
   concurrency: 3,
   timeout: 30,
