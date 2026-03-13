@@ -8,7 +8,7 @@ import type { Logger } from '../usecases/ports.js';
 const CONFIG_FILENAME = 'config.yaml';
 const CONFIG_PATHS = [
   join(process.cwd(), CONFIG_FILENAME),
-  join(homedir(), '.coursera-subtitle-dl', CONFIG_FILENAME),
+  join(homedir(), '.media-summ', CONFIG_FILENAME),
 ];
 
 function loadDotEnv(): void {

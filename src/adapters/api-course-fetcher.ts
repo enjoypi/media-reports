@@ -4,7 +4,7 @@
  * @layer Adapters
  */
 
-import type { Course, Week, Lesson, SubtitleMeta, CourseFetcher, HttpClient, Logger } from '../usecases/ports.js';
+import type { Course, Week, Lesson, CourseFetcher, HttpClient, Logger } from '../usecases/ports.js';
 
 interface LinkedModule { id: string; name: string; }
 interface LinkedLesson { id: string; itemIds: string[]; moduleId: string; }
@@ -19,17 +19,20 @@ interface MaterialsResponse {
   };
 }
 
-export class ApiCourseFetcher implements CourseFetcher {
-  private readonly baseUrl = 'https://www.coursera.org';
+export interface ApiCourseFetcherOptions {
+  baseUrl: string;
+}
 
+export class ApiCourseFetcher implements CourseFetcher {
   constructor(
     private httpClient: HttpClient,
     private logger: Logger,
+    private options: ApiCourseFetcherOptions,
   ) {}
 
   async fetchBySlug(slug: string): Promise<Course | null> {
     const url =
-      `${this.baseUrl}/api/onDemandCourseMaterials.v2/?q=slug&slug=${slug}` +
+      `${this.options.baseUrl}/api/onDemandCourseMaterials.v2/?q=slug&slug=${slug}` +
       '&includes=modules,lessons,items' +
       '&fields=moduleIds,' +
       'onDemandCourseMaterialModules.v1(name,slug,lessonIds),' +
@@ -76,11 +79,11 @@ export class ApiCourseFetcher implements CourseFetcher {
     }
 
     const courseName = await this.fetchName(slug);
-    return { slug, name: courseName || slug, url: `https://www.coursera.org/learn/${slug}`, weeks };
+    return { slug, name: courseName || slug, url: `${this.options.baseUrl}/learn/${slug}`, weeks };
   }
 
   async fetchName(slug: string): Promise<string | null> {
-    const url = `${this.baseUrl}/api/courses.v1?q=slug&slug=${slug}&fields=name`;
+    const url = `${this.options.baseUrl}/api/courses.v1?q=slug&slug=${slug}&fields=name`;
     try {
       const res = await this.httpClient.get(url);
       if (res.status === 200) {

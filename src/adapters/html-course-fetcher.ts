@@ -17,14 +17,19 @@ interface NextDataModule {
   }>;
 }
 
+export interface HtmlCourseFetcherOptions {
+  baseUrl: string;
+}
+
 export class HtmlCourseFetcher implements CourseFetcher {
   constructor(
     private httpClient: HttpClient,
     private logger: Logger,
+    private options: HtmlCourseFetcherOptions,
   ) {}
 
   async fetchBySlug(slug: string): Promise<Course | null> {
-    const url = `https://www.coursera.org/learn/${slug}`;
+    const url = `${this.options.baseUrl}/learn/${slug}`;
     const res = await this.httpClient.get(url);
 
     if (res.status === 401) {

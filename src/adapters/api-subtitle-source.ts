@@ -16,13 +16,18 @@ interface VideoResponse {
   };
 }
 
-export class ApiSubtitleSource implements SubtitleSource {
-  private readonly baseUrl = 'https://www.coursera.org';
+export interface ApiSubtitleSourceOptions {
+  baseUrl: string;
+}
 
-  constructor(private httpClient: HttpClient) {}
+export class ApiSubtitleSource implements SubtitleSource {
+  constructor(
+    private httpClient: HttpClient,
+    private options: ApiSubtitleSourceOptions,
+  ) {}
 
   async fetchForVideo(videoId: string): Promise<SubtitleMeta[]> {
-    const url = `${this.baseUrl}/api/onDemandLectureVideos.v1/${videoId}?includes=video&fields=subtitles,subtitlesVtt`;
+    const url = `${this.options.baseUrl}/api/onDemandLectureVideos.v1/${videoId}?includes=video&fields=subtitles,subtitlesVtt`;
     const res = await this.httpClient.get(url);
     if (res.status !== 200) return [];
 
@@ -52,6 +57,6 @@ export class ApiSubtitleSource implements SubtitleSource {
   }
 
   private toAbsoluteUrl(path: string): string {
-    return path.startsWith('http') ? path : `${this.baseUrl}${path}`;
+    return path.startsWith('http') ? path : `${this.options.baseUrl}${path}`;
   }
 }

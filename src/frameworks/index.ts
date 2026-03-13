@@ -13,7 +13,7 @@ import { registerSummarize } from './summarize.js';
 const program = new Command();
 
 program
-  .name('coursera-subtitle-dl')
+  .name('media-summ')
   .description('Coursera 课程英文字幕批量下载工具')
   .version('1.0.0');
 

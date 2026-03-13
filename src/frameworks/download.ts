@@ -88,7 +88,7 @@ async function handleSpecialization(
 
     try {
       const course = await container.parseCourseUseCase.execute({
-        courseUrl: `https://www.coursera.org/learn/${c.slug}`,
+        courseUrl: `${config.coursera_base_url}/learn/${c.slug}`,
       });
       const results = await container.downloadSubtitlesUseCase.execute({
         course,
