@@ -1,14 +1,14 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { CookieJar, Cookie } from 'tough-cookie';
-import { info, warn } from './logger.js';
+import type { Logger } from '../usecases/ports.js';
 
 const NETSCAPE_COOKIE_FIELDS = 7;
 const HTTP_ONLY_PREFIX = '#HttpOnly_';
 
-export function loadCookies(filePath: string): CookieJar | null {
+export function loadCookies(filePath: string, logger?: Logger): CookieJar | null {
   if (!existsSync(filePath)) return null;
 
-  info(`加载 Cookie: ${filePath}`);
+  logger?.info(`加载 Cookie: ${filePath}`);
   const jar = new CookieJar();
   const lines = readFileSync(filePath, 'utf-8').split('\n');
 
@@ -34,7 +34,7 @@ export function loadCookies(filePath: string): CookieJar | null {
       const url = `http${isSecure ? 's' : ''}://${domain.replace(/^\./, '')}${path}`;
       jar.setCookieSync(cookie.toString(), url);
     } catch {
-      warn(`跳过无效 Cookie 行: ${name}`);
+      logger?.warn(`跳过无效 Cookie 行: ${name}`);
     }
   }
 

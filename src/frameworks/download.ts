@@ -9,7 +9,6 @@ import { Command } from 'commander';
 import { createContainer, extractSpecSlug } from './container.js';
 import { DownloadStatus } from '../usecases/ports.js';
 import type { DownloadResult } from '../usecases/ports.js';
-import { error as logError } from '../adapters/logger.js';
 
 function extractSiteName(url: string): string {
   try {
@@ -60,7 +59,7 @@ export function registerDownload(program: Command): void {
         const msg = error.message;
 
         if (msg.includes('认证失败') || msg.includes('401')) {
-          logError(
+          console.error(
             '认证失败（Cookie 无效或已过期）。请重新导出 cookies.txt：\n' +
             '1. 在浏览器中登录目标网站\n' +
             '2. 使用浏览器扩展导出 cookies.txt\n' +
@@ -69,7 +68,7 @@ export function registerDownload(program: Command): void {
           process.exit(2);
         }
         if (msg.includes('无权访问') || msg.includes('403')) {
-          logError(
+          console.error(
             '无权访问（需要登录或付费）。请确认：\n' +
             '1. 在浏览器中登录目标网站\n' +
             '2. 使用浏览器扩展导出 cookies.txt\n' +
@@ -77,7 +76,7 @@ export function registerDownload(program: Command): void {
           );
           process.exit(2);
         }
-        logError(msg);
+        console.error(msg);
         process.exit(1);
       }
     });

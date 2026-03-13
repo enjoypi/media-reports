@@ -44,7 +44,7 @@ export function createContainer(explicitConfigPath?: string): Container {
   const config = loadConfig(explicitConfigPath, logger);
 
   // 基础设施
-  const cookieJar = loadCookies(config.cookies_file);
+  const cookieJar = loadCookies(config.cookies_file, logger);
   const httpClient = new FetchHttpClient({
     timeout: config.timeout,
     userAgent: config.user_agent,

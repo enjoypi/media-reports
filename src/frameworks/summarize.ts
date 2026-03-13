@@ -8,7 +8,6 @@ import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { Command } from 'commander';
 import { createContainer } from './container.js';
-import { error as logError } from '../adapters/logger.js';
 
 const DEFAULT_PROMPT = `请基于以下课程字幕内容，生成一份完整、连贯、结构化的课程学习笔记。
 要求：
@@ -61,14 +60,14 @@ export function registerSummarize(program: Command): void {
             });
           }
         } catch (err) {
-          logError(`课程处理失败 [${absPath}]: ${(err as Error).message}`);
+          container.logger.error(`课程处理失败 [${absPath}]: ${(err as Error).message}`);
           failures.push(absPath);
         }
       }
 
       if (failures.length > 0) {
-        logError(`\n${failures.length} 个课程处理失败:`);
-        failures.forEach((f) => logError(`  - ${f}`));
+        container.logger.error(`\n${failures.length} 个课程处理失败:`);
+        failures.forEach((f) => container.logger.error(`  - ${f}`));
         process.exit(1);
       }
       container.logger.info('全部完成');
