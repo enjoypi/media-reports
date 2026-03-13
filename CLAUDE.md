@@ -9,6 +9,7 @@
 - `ports.ts` 重新导出实体类型：`export { Foo } from '../entities/foo.js'`，不重复定义
 - TypeScript ESM 模块，构建输出到 `dist/`
 - Adapter 接收外部配置通过 options 对象（如 `{ baseUrl: config.base_url }`）
+- `sanitize` 必须处理所有特殊字符：`&@#$%^(){}[];',.!~\` 等
 
 ## Runtime
 - `download` 子命令：**不需要** LLM API key，只需要 `cookies.txt`
@@ -23,9 +24,11 @@
 
 ## Commands
 - `pnpm build` - 编译 TypeScript
-- `node dist/frameworks/index.js download <url>` - 下载字幕（CLI 名：media-summ）
-- `node dist/frameworks/index.js summarize <path>` - 总结课程
-- `pnpm test` - vitest（目前没有测试文件）
+- `pnpm start` - 运行 CLI（等效于 `node dist/frameworks/index.js`）
+- `pnpm start download <url>` - 下载字幕（推荐用法）
+- `pnpm start summarize <path>` - 总结课程（推荐用法）
+- `pnpm test` - vitest（测试在 `src/**/*.test.ts`）
+- `pnpm lint` - 类型检查（不输出 JS）
 
 ## Configuration
 - 本地配置：`./config.yaml`
@@ -34,7 +37,34 @@
 - 流控配置：`rate_limit.default_concurrency`, `rate_limit.domain_concurrency`, `rate_limit.default_requests_per_minute`, `rate_limit.domain_requests_per_minute`
 
 ## Prerequisites
-- `cookies.txt` - Netscape 格式 Cookie 文件，需从浏览器导出目标网站登录状态
+- `cookies.txt` - Netscape 格式 Cookie 文件
+  - Chrome 导出方法：安装 "Get cookies.txt LOCALLY" 扩展 → 访问 coursera.org → 点击扩展 → 复制 Netscape 格式内容保存为 cookies.txt
+
+## Output Structure
+字幕下载到 `./subtitles/<website-domain>/<course-name>/`，所有名称经过 sanitize 处理（小写、特殊字符转连字符）：
+
+**单课程结构**：
+```
+subtitles/
+└── coursera.org/
+    └── neural-networks-and-deep-learning/
+        ├── 01-01-welcome-to-the-course.srt
+        ├── 01-02-introduction-to-deep-learning.srt
+        └── 02-01-neural-networks-basics.srt
+```
+
+**Specialization 结构**：
+```
+subtitles/
+└── coursera.org/
+    └── machine-learning-specialization/
+        ├── 01-supervised-machine-learning-regression-and-classification/
+        ├── 02-advanced-learning-algorithms/
+        └── 03-unsupervised-learning-recommenders-reinforcement-learning/
+```
+
+- **目录名**：`{sanitized-course-name}/` 或 `{sanitized-spec-name}/{index}-{sanitized-course-name}/`
+- **文件名**：`{week}-{index}-{sanitized-lesson-title}.{format}`
 
 ## Dependencies
 - HTTP: `undici` (ProxyAgent)

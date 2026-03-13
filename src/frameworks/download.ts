@@ -9,6 +9,7 @@ import { Command } from 'commander';
 import { createContainer, extractSpecSlug } from './container.js';
 import { DownloadStatus } from '../usecases/ports.js';
 import type { DownloadResult } from '../usecases/ports.js';
+import { sanitize } from '../entities/sanitize.js';
 
 function extractSiteName(url: string): string {
   try {
@@ -98,7 +99,9 @@ async function handleSpecialization(
 
   for (const c of spec.courses) {
     const prefix = String(c.index).padStart(2, '0');
-    const courseOutputDir = join(baseOutputDir, spec.name, `${prefix} - ${c.name}`);
+    const safeSpecName = sanitize(spec.name, config.max_filename_length);
+    const safeCourseName = sanitize(c.name, config.max_filename_length);
+    const courseOutputDir = join(baseOutputDir, safeSpecName, `${prefix}-${safeCourseName}`);
     container.logger.info(`\n[${c.index}/${spec.courses.length}] ${c.name}`);
 
     try {
