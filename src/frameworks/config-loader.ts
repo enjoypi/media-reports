@@ -56,6 +56,10 @@ function readAndMerge(p: string, logger?: Logger): AppConfig {
     url_patterns: { ...DEFAULT_CONFIG.url_patterns, ...(parsed?.url_patterns ?? {}) },
     exit_codes: { ...DEFAULT_CONFIG.exit_codes, ...(parsed?.exit_codes ?? {}) },
     download: { ...DEFAULT_CONFIG.download, ...(parsed?.download ?? {}) },
+    coursera: { ...DEFAULT_CONFIG.coursera, ...(parsed?.coursera ?? {}) },
+    retry: { ...DEFAULT_CONFIG.retry, ...(parsed?.retry ?? {}) },
+    proxy: { ...DEFAULT_CONFIG.proxy, ...(parsed?.proxy ?? {}) },
+    error_messages: { ...DEFAULT_CONFIG.error_messages, ...(parsed?.error_messages ?? {}) },
   };
 }
 

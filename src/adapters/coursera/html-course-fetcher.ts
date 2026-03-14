@@ -6,6 +6,7 @@
 
 import * as cheerio from 'cheerio';
 import type { Course, Week, Lesson, CourseFetcher, HttpClient } from '../../usecases/ports.js';
+import type { CourseraConfig } from '../../entities/config.js';
 
 interface NextDataModule {
   name: string;
@@ -19,6 +20,7 @@ interface NextDataModule {
 
 export interface HtmlCourseFetcherOptions {
   baseUrl: string;
+  coursera: CourseraConfig;
 }
 
 export class CourseraHtmlCourseFetcher implements CourseFetcher {
@@ -28,7 +30,8 @@ export class CourseraHtmlCourseFetcher implements CourseFetcher {
   ) {}
 
   async fetchBySlug(slug: string): Promise<Course | null> {
-    const url = `${this.options.baseUrl}/learn/${slug}`;
+    const { coursera } = this.options;
+    const url = `${this.options.baseUrl}${coursera.course_path_prefix}${slug}`;
     const res = await this.httpClient.get(url);
 
     if (res.status === 401) {
@@ -40,7 +43,7 @@ export class CourseraHtmlCourseFetcher implements CourseFetcher {
     if (res.status !== 200) return null;
 
     const $ = cheerio.load(res.body);
-    const scriptEl = $('script#__NEXT_DATA__');
+    const scriptEl = $(coursera.next_data_selector);
     if (!scriptEl.length) return null;
 
     let nextData: Record<string, unknown>;
@@ -58,14 +61,14 @@ export class CourseraHtmlCourseFetcher implements CourseFetcher {
 
     const weeks: Week[] = modules.map((mod, idx) => {
       const lessons: Lesson[] = (mod.items ?? [])
-        .filter((item) => item.typeName === 'lecture' || item.content?.subtitles)
+        .filter((item) => item.typeName === coursera.lecture_type_name || item.content?.subtitles)
         .map((item, lessonIdx) => ({
           title: item.name,
           videoId: item.id,
           subtitles: item.content?.subtitles
             ? Object.entries(item.content.subtitles).map(([lang, subtitleUrl]) => ({
                 lang,
-                format: subtitleUrl.endsWith('.vtt') ? 'vtt' : 'srt',
+                format: subtitleUrl.endsWith(coursera.vtt_extension) ? coursera.format_vtt : coursera.format_srt,
                 url: subtitleUrl,
               }))
             : [],
@@ -75,14 +78,13 @@ export class CourseraHtmlCourseFetcher implements CourseFetcher {
     });
 
     if (weeks.length === 0) {
-      weeks.push({ number: 1, title: 'Week 1', lessons: [] });
+      weeks.push({ number: coursera.default_week_number, title: coursera.default_week_title, lessons: [] });
     }
 
     return { slug, name: courseName, url, weeks };
   }
 
   async fetchName(slug: string): Promise<string | null> {
-    // HTML fetcher 在 fetchBySlug 中已经返回完整课程名
     const course = await this.fetchBySlug(slug);
     return course?.name ?? null;
   }

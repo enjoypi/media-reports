@@ -20,6 +20,9 @@ export interface RateLimiterConfig {
 
 export interface PathBuilderConfig {
   number_padding_width: number;
+  pad_char: string;
+  separator: string;
+  extension_separator: string;
 }
 
 export interface CourseScannerConfig {
@@ -41,6 +44,7 @@ export interface UrlPatternsConfig {
   specialization_slug: string;
   site_name_strip_www: string;
   site_name_default: string;
+  url_detect_pattern: string;
 }
 
 export interface ExitCodesConfig {
@@ -52,11 +56,38 @@ export interface ExitCodesConfig {
 
 export interface DownloadConfig {
   prefix_padding_width: number;
+  fallback_lang: string;
 }
 
 export interface RateLimitConfig {
   default_requests_per_minute: number;
   domain_requests_per_minute: Record<string, number>;
+}
+
+export interface CourseraConfig {
+  course_path_prefix: string;
+  next_data_selector: string;
+  lecture_type_name: string;
+  default_week_number: number;
+  default_week_title: string;
+  vtt_extension: string;
+  format_vtt: string;
+  format_srt: string;
+}
+
+export interface RetryConfig {
+  exponential_base: number;
+}
+
+export interface ProxyConfig {
+  env_vars: string[];
+}
+
+export interface ErrorMessagesConfig {
+  auth_error_patterns: string[];
+  access_error_patterns: string[];
+  auth_error_hint: string;
+  access_error_hint: string;
 }
 
 export interface AppConfig {
@@ -81,6 +112,10 @@ export interface AppConfig {
   url_patterns: UrlPatternsConfig;
   exit_codes: ExitCodesConfig;
   download: DownloadConfig;
+  coursera: CourseraConfig;
+  retry: RetryConfig;
+  proxy: ProxyConfig;
+  error_messages: ErrorMessagesConfig;
 }
 
 export const DEFAULT_CONFIG: AppConfig = {
@@ -126,10 +161,13 @@ export const DEFAULT_CONFIG: AppConfig = {
   },
   path_builder: {
     number_padding_width: 2,
+    pad_char: '0',
+    separator: '-',
+    extension_separator: '.',
   },
   course_scanner: {
     week_pattern: '^Week\\s+(\\d+)$',
-    sub_course_pattern: '^(\\d+)\\s*-\s*',
+    sub_course_pattern: '^(\\d+)\\s*-\\s*',
     subtitle_extension: '.vtt',
   },
   sanitize: {
@@ -144,6 +182,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     specialization_slug: 'coursera\\.org/specializations/([^/?#]+)',
     site_name_strip_www: '^www\\.',
     site_name_default: 'unknown',
+    url_detect_pattern: '^https?://',
   },
   exit_codes: {
     success: 0,
@@ -153,5 +192,36 @@ export const DEFAULT_CONFIG: AppConfig = {
   },
   download: {
     prefix_padding_width: 2,
+    fallback_lang: 'en',
+  },
+  coursera: {
+    course_path_prefix: '/learn/',
+    next_data_selector: 'script#__NEXT_DATA__',
+    lecture_type_name: 'lecture',
+    default_week_number: 1,
+    default_week_title: 'Week 1',
+    vtt_extension: '.vtt',
+    format_vtt: 'vtt',
+    format_srt: 'srt',
+  },
+  retry: {
+    exponential_base: 2,
+  },
+  proxy: {
+    env_vars: ['HTTPS_PROXY', 'https_proxy'],
+  },
+  error_messages: {
+    auth_error_patterns: ['认证失败', '401'],
+    access_error_patterns: ['无权访问', '403'],
+    auth_error_hint:
+      '认证失败（Cookie 无效或已过期）。请重新导出 cookies.txt：\n' +
+      '1. 在浏览器中登录目标网站\n' +
+      '2. 使用浏览器扩展导出 cookies.txt\n' +
+      '3. 确认已登录并有访问权限',
+    access_error_hint:
+      '无权访问（需要登录或付费）。请确认：\n' +
+      '1. 在浏览器中登录目标网站\n' +
+      '2. 使用浏览器扩展导出 cookies.txt\n' +
+      '3. 确认有访问权限',
   },
 };

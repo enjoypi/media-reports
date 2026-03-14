@@ -12,6 +12,7 @@ export interface DomainRateLimiterOptions {
   rpmToMsMultiplier: number;
   minDelayFactor: number;
   maxDelayFactor: number;
+  unknownDomain: string;
 }
 
 export class DomainRateLimiter {
@@ -24,7 +25,6 @@ export class DomainRateLimiter {
     const domain = this.extractDomain(url);
     const rpm = this.getRequestsPerMinute(domain);
 
-    // 根据 RPM 计算随机延迟
     await this.applyRandomDelay(rpm, domain);
 
     return () => this.release(domain);
@@ -54,7 +54,7 @@ export class DomainRateLimiter {
     try {
       return new URL(url).hostname;
     } catch {
-      return 'unknown';
+      return this.options.unknownDomain;
     }
   }
 

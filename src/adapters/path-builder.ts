@@ -6,12 +6,12 @@
 
 import { join } from 'node:path';
 import type { PathBuilder } from '../usecases/ports.js';
-import type { SanitizeConfig } from '../entities/config.js';
+import type { SanitizeConfig, PathBuilderConfig } from '../entities/config.js';
 import { sanitize } from '../entities/sanitize.js';
 
 export interface PathBuilderOptions {
   maxFilenameLength: number;
-  numberPaddingWidth: number;
+  pathBuilderConfig: PathBuilderConfig;
   sanitizeConfig: SanitizeConfig;
 }
 
@@ -28,8 +28,8 @@ export class DefaultPathBuilder implements PathBuilder {
   ): string {
     const safeCourse = sanitize(courseName, this.options.maxFilenameLength, this.options.sanitizeConfig);
     const safeLesson = sanitize(lessonTitle, this.options.maxFilenameLength, this.options.sanitizeConfig);
-    const width = this.options.numberPaddingWidth;
-    const filename = `${weekNumber.toString().padStart(width, '0')}-${lessonIndex.toString().padStart(width, '0')}-${safeLesson}.${format}`;
+    const { number_padding_width, pad_char, separator, extension_separator } = this.options.pathBuilderConfig;
+    const filename = `${weekNumber.toString().padStart(number_padding_width, pad_char)}${separator}${lessonIndex.toString().padStart(number_padding_width, pad_char)}${separator}${safeLesson}${extension_separator}${format}`;
     return join(outputDir, safeCourse, filename);
   }
 }

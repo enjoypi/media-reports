@@ -8,22 +8,29 @@ import OpenAI from 'openai';
 import { ProxyAgent } from 'undici';
 import type { LlmClient, LlmConfig } from '../usecases/ports.js';
 
+export interface OpenAiLlmClientOptions {
+  config: LlmConfig;
+  proxyEnvVars: string[];
+}
+
 export class OpenAiLlmClient implements LlmClient {
   private client: OpenAI;
+  private config: LlmConfig;
 
-  constructor(private config: LlmConfig) {
-    if (!config.api_key) throw new Error('LLM 配置错误: api_key 未设置');
-    if (!config.base_url) throw new Error('LLM 配置错误: base_url 未设置');
+  constructor(options: OpenAiLlmClientOptions) {
+    this.config = options.config;
+    if (!this.config.api_key) throw new Error('LLM 配置错误: api_key 未设置');
+    if (!this.config.base_url) throw new Error('LLM 配置错误: base_url 未设置');
 
     const opts: ConstructorParameters<typeof OpenAI>[0] = {
-      apiKey: config.api_key,
-      baseURL: config.base_url,
-      timeout: config.timeout,
+      apiKey: this.config.api_key,
+      baseURL: this.config.base_url,
+      timeout: this.config.timeout,
     };
 
-    const proxy = process.env['HTTPS_PROXY'] || process.env['https_proxy'];
+    const proxy = this.resolveProxy(options.proxyEnvVars);
     if (proxy) {
-      opts.fetchOptions = { dispatcher: new ProxyAgent({ uri: proxy, connectTimeout: config.timeout }) };
+      opts.fetchOptions = { dispatcher: new ProxyAgent({ uri: proxy, connectTimeout: this.config.timeout }) };
     }
 
     this.client = new OpenAI(opts);
@@ -54,5 +61,13 @@ export class OpenAiLlmClient implements LlmClient {
     }
 
     return chunks.join('');
+  }
+
+  private resolveProxy(envVars: string[]): string | undefined {
+    for (const key of envVars) {
+      const val = process.env[key];
+      if (val) return val;
+    }
+    return undefined;
   }
 }

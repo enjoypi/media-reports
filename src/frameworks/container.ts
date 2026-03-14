@@ -41,7 +41,6 @@ export function createContainer(explicitConfigPath?: string): Container {
   const logger = new ConsoleLogger();
   const config = loadConfig(explicitConfigPath, logger);
 
-  // 基础设施
   const cookieJar = loadCookies(config.cookies_file, logger);
   const httpClient = new FetchHttpClient({
     timeout: config.timeout,
@@ -50,27 +49,35 @@ export function createContainer(explicitConfigPath?: string): Container {
   });
 
   const retryPolicy = new ExponentialRetryPolicy(
-    { maxRetries: config.retry_max, baseDelayMs: config.retry_base_ms },
-    logger,
-  );
-
-  // 域名限流器
-  const rateLimiter = new DomainRateLimiter(
     {
-      defaultRequestsPerMinute: config.rate_limit.default_requests_per_minute,
-      domainRequestsPerMinute: config.rate_limit.domain_requests_per_minute,
-      rpmToMsMultiplier: config.rate_limiter.rpm_to_ms_multiplier ?? 60000,
-      minDelayFactor: config.rate_limiter.min_delay_factor ?? 0.5,
-      maxDelayFactor: config.rate_limiter.max_delay_factor ?? 1.5,
+      maxRetries: config.retry_max,
+      baseDelayMs: config.retry_base_ms,
+      exponentialBase: config.retry.exponential_base,
     },
     logger,
   );
 
-  // Adapters
-  const courseFetcher = new CourseraCourseFetcher(httpClient, { baseUrl: config.base_url });
+  const rateLimiter = new DomainRateLimiter(
+    {
+      defaultRequestsPerMinute: config.rate_limit.default_requests_per_minute,
+      domainRequestsPerMinute: config.rate_limit.domain_requests_per_minute,
+      rpmToMsMultiplier: config.rate_limiter.rpm_to_ms_multiplier,
+      minDelayFactor: config.rate_limiter.min_delay_factor,
+      maxDelayFactor: config.rate_limiter.max_delay_factor,
+      unknownDomain: config.url_patterns.site_name_default,
+    },
+    logger,
+  );
+
+  const courseraOpts = { baseUrl: config.base_url, coursera: config.coursera };
+  const courseFetcher = new CourseraCourseFetcher(httpClient, courseraOpts);
   const subtitleSource = new CourseraSubtitleSource(httpClient, { baseUrl: config.base_url });
   const fileSystem = new NodeFileSystem();
-  const pathBuilder = new DefaultPathBuilder({ maxFilenameLength: config.max_filename_length, numberPaddingWidth: config.path_builder.number_padding_width ?? 2, sanitizeConfig: config.sanitize });
+  const pathBuilder = new DefaultPathBuilder({
+    maxFilenameLength: config.max_filename_length,
+    pathBuilderConfig: config.path_builder,
+    sanitizeConfig: config.sanitize,
+  });
   const courseScanner = new FileSystemCourseScanner({
     weekPattern: config.course_scanner.week_pattern,
     subCoursePattern: config.course_scanner.sub_course_pattern,
@@ -79,11 +86,10 @@ export function createContainer(explicitConfigPath?: string): Container {
   const vttParser = new LibVttParser({ emptyPlaceholder: config.empty_subtitle_placeholder });
   const specializationFetcher = new CourseraSpecializationFetcher(httpClient, { baseUrl: config.base_url, specializationSlugPattern: config.url_patterns.specialization_slug });
 
-  // Use Cases (注入依赖)
-  const htmlCourseFetcher = new CourseraHtmlCourseFetcher(httpClient, { baseUrl: config.base_url });
+  const htmlCourseFetcher = new CourseraHtmlCourseFetcher(httpClient, courseraOpts);
   const parseCourseUseCase = new ParseCourseUseCase(
     courseFetcher,
-    htmlCourseFetcher, // 备用 fetcher
+    htmlCourseFetcher,
     subtitleSource,
     retryPolicy,
     logger,
@@ -99,9 +105,11 @@ export function createContainer(explicitConfigPath?: string): Container {
     logger,
   );
 
-  // 延迟创建 LLM 相关依赖（仅 summarize 子命令需要）
   const getSummarizeUseCase = (): SummarizeCourseUseCase => {
-    const llmClient = new OpenAiLlmClient(config.llm);
+    const llmClient = new OpenAiLlmClient({
+      config: config.llm,
+      proxyEnvVars: config.proxy.env_vars,
+    });
     return new SummarizeCourseUseCase(llmClient, vttParser, fileSystem, logger);
   };
 

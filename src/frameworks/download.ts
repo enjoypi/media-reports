@@ -9,6 +9,7 @@ import { Command } from 'commander';
 import { createContainer } from './container.js';
 import { DownloadStatus } from '../usecases/ports.js';
 import type { DownloadResult } from '../usecases/ports.js';
+
 import { sanitize } from '../entities/sanitize.js';
 import { extractSpecSlug } from '../adapters/coursera/specialization-fetcher.js';
 
@@ -25,8 +26,8 @@ function hasAllFailed(results: DownloadResult[]): boolean {
   return results.length > 0 && results.every((r) => r.status === DownloadStatus.Failed);
 }
 
-function isAuthError(msg: string): boolean {
-  return msg.includes('认证失败') || msg.includes('无权访问');
+function matchesPatterns(msg: string, patterns: string[]): boolean {
+  return patterns.some((p) => msg.includes(p));
 }
 
 export function registerDownload(program: Command): void {
@@ -51,6 +52,7 @@ export function registerDownload(program: Command): void {
           const results = await container.downloadSubtitlesUseCase.execute({
             course,
             preferredLang: config.preferred_lang,
+            fallbackLang: config.download.fallback_lang,
             outputDir: baseOutputDir,
             concurrency: config.concurrency,
           });
@@ -59,23 +61,14 @@ export function registerDownload(program: Command): void {
       } catch (err) {
         const error = err as Error;
         const msg = error.message;
+        const errCfg = config.error_messages;
 
-        if (msg.includes('认证失败') || msg.includes('401')) {
-          console.error(
-            '认证失败（Cookie 无效或已过期）。请重新导出 cookies.txt：\n' +
-            '1. 在浏览器中登录目标网站\n' +
-            '2. 使用浏览器扩展导出 cookies.txt\n' +
-            '3. 确认已登录并有访问权限',
-          );
+        if (matchesPatterns(msg, errCfg.auth_error_patterns)) {
+          console.error(errCfg.auth_error_hint);
           process.exit(config.exit_codes.auth_error);
         }
-        if (msg.includes('无权访问') || msg.includes('403')) {
-          console.error(
-            '无权访问（需要登录或付费）。请确认：\n' +
-            '1. 在浏览器中登录目标网站\n' +
-            '2. 使用浏览器扩展导出 cookies.txt\n' +
-            '3. 确认有访问权限',
-          );
+        if (matchesPatterns(msg, errCfg.access_error_patterns)) {
+          console.error(errCfg.access_error_hint);
           process.exit(config.exit_codes.auth_error);
         }
         console.error(msg);
@@ -99,25 +92,26 @@ async function handleSpecialization(
   let totalFailed = 0;
 
   for (const c of spec.courses) {
-    const prefix = String(c.index).padStart(config.download.prefix_padding_width, '0');
+    const prefix = String(c.index).padStart(config.download.prefix_padding_width, config.path_builder.pad_char);
     const safeSpecName = sanitize(spec.name, config.max_filename_length, config.sanitize);
     const safeCourseName = sanitize(c.name, config.max_filename_length, config.sanitize);
-    const courseOutputDir = join(baseOutputDir, safeSpecName, `${prefix}-${safeCourseName}`);
+    const courseOutputDir = join(baseOutputDir, safeSpecName, `${prefix}${config.path_builder.separator}${safeCourseName}`);
     container.logger.info(`\n[${c.index}/${spec.courses.length}] ${c.name}`);
 
     try {
       const course = await container.parseCourseUseCase.execute({
-        courseUrl: `${config.base_url}/learn/${c.slug}`,
+        courseUrl: `${config.base_url}${config.coursera.course_path_prefix}${c.slug}`,
       });
       const results = await container.downloadSubtitlesUseCase.execute({
         course,
         preferredLang: config.preferred_lang,
+        fallbackLang: config.download.fallback_lang,
         outputDir: courseOutputDir,
         concurrency: config.concurrency,
       });
       if (hasAllFailed(results)) totalFailed++;
     } catch (err) {
-      if (isAuthError((err as Error).message)) {
+      if (matchesPatterns((err as Error).message, [...config.error_messages.auth_error_patterns, ...config.error_messages.access_error_patterns])) {
         container.logger.error(`跳过 ${c.name}: 需要认证或付费`);
         totalFailed++;
       } else {

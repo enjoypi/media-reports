@@ -11,6 +11,7 @@ import { DownloadStatus } from './ports.js';
 export interface DownloadSubtitlesInput {
   course: Course;
   preferredLang: string;
+  fallbackLang: string;
   outputDir: string;
   concurrency: number;
 }
@@ -40,7 +41,7 @@ export class DownloadSubtitlesUseCase {
   ) {}
 
   async execute(input: DownloadSubtitlesInput): Promise<DownloadResult[]> {
-    const tasks = this.buildTasks(input.course, input.preferredLang);
+    const tasks = this.buildTasks(input.course, input.preferredLang, input.fallbackLang);
 
     if (tasks.length === 0) {
       this.logger.warn('未找到符合条件的字幕');
@@ -66,12 +67,12 @@ export class DownloadSubtitlesUseCase {
     return results;
   }
 
-  private buildTasks(course: Course, preferredLang: string): DownloadTask[] {
+  private buildTasks(course: Course, preferredLang: string, fallbackLang: string): DownloadTask[] {
     const tasks: DownloadTask[] = [];
 
     for (const week of course.weeks) {
       for (const lesson of week.lessons) {
-        const sub = this.pickSubtitle(lesson.subtitles, preferredLang);
+        const sub = this.pickSubtitle(lesson.subtitles, preferredLang, fallbackLang);
         if (sub) {
           tasks.push({
             weekNumber: week.number,
@@ -90,10 +91,10 @@ export class DownloadSubtitlesUseCase {
     return tasks;
   }
 
-  private pickSubtitle(subtitles: SubtitleMeta[], preferredLang: string): Pick<SubtitleMeta, 'format' | 'url'> | null {
+  private pickSubtitle(subtitles: SubtitleMeta[], preferredLang: string, fallbackLang: string): Pick<SubtitleMeta, 'format' | 'url'> | null {
     return (
       subtitles.find((s) => s.lang === preferredLang) ??
-      subtitles.find((s) => s.lang.startsWith('en')) ??
+      subtitles.find((s) => s.lang.startsWith(fallbackLang)) ??
       null
     );
   }

@@ -5,6 +5,7 @@
  */
 
 import type { Course, Week, Lesson, CourseFetcher, HttpClient } from '../../usecases/ports.js';
+import type { CourseraConfig } from '../../entities/config.js';
 
 interface LinkedModule { id: string; name: string; }
 interface LinkedLesson { id: string; itemIds: string[]; moduleId: string; }
@@ -21,6 +22,7 @@ interface MaterialsResponse {
 
 export interface CourseFetcherOptions {
   baseUrl: string;
+  coursera: CourseraConfig;
 }
 
 export class CourseraCourseFetcher implements CourseFetcher {
@@ -30,6 +32,7 @@ export class CourseraCourseFetcher implements CourseFetcher {
   ) {}
 
   async fetchBySlug(slug: string): Promise<Course | null> {
+    const { coursera } = this.options;
     const url =
       `${this.options.baseUrl}/api/onDemandCourseMaterials.v2/?q=slug&slug=${slug}` +
       '&includes=modules,lessons,items' +
@@ -57,7 +60,7 @@ export class CourseraCourseFetcher implements CourseFetcher {
     const items = linked['onDemandCourseMaterialItems.v2'] ?? [];
 
     const itemMap = new Map(
-      items.filter((i) => i.contentSummary?.typeName === 'lecture').map((i) => [i.id, i]),
+      items.filter((i) => i.contentSummary?.typeName === coursera.lecture_type_name).map((i) => [i.id, i]),
     );
 
     const weeks: Week[] = modules.map((mod, idx) => {
@@ -79,11 +82,11 @@ export class CourseraCourseFetcher implements CourseFetcher {
     });
 
     if (weeks.length === 0) {
-      weeks.push({ number: 1, title: 'Week 1', lessons: [] });
+      weeks.push({ number: coursera.default_week_number, title: coursera.default_week_title, lessons: [] });
     }
 
     const courseName = await this.fetchName(slug);
-    return { slug, name: courseName || slug, url: `${this.options.baseUrl}/learn/${slug}`, weeks };
+    return { slug, name: courseName || slug, url: `${this.options.baseUrl}${coursera.course_path_prefix}${slug}`, weeks };
   }
 
   async fetchName(slug: string): Promise<string | null> {
