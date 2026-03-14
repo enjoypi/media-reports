@@ -1,227 +1,137 @@
-export interface LlmConfig {
-  base_url: string;
-  api_key: string;
-  model: string;
-  reasoning_effort: string;
-  max_completion_tokens: number;
-  timeout: number;
-}
+import { z } from 'zod';
 
-export interface SummarizeConfig {
-  prompt: string;
-  output_filename: string;
-}
+export const llmSchema = z.object({
+  base_url: z.string(),
+  api_key: z.string(),
+  model: z.string(),
+  reasoning_effort: z.string(),
+  max_completion_tokens: z.number(),
+  timeout: z.number(),
+});
 
-export interface RateLimiterConfig {
-  rpm_to_ms_multiplier: number;
-  min_delay_factor: number;
-  max_delay_factor: number;
-}
+export const summarizeSchema = z.object({
+  prompt: z.string(),
+  output_filename: z.string(),
+});
 
-export interface PathBuilderConfig {
-  number_padding_width: number;
-  pad_char: string;
-  separator: string;
-  extension_separator: string;
-}
+export const rateLimiterSchema = z.object({
+  rpm_to_ms_multiplier: z.number(),
+  min_delay_factor: z.number(),
+  max_delay_factor: z.number(),
+});
 
-export interface CourseScannerConfig {
-  week_pattern: string;
-  sub_course_pattern: string;
-  subtitle_extension: string;
-}
+export const pathBuilderSchema = z.object({
+  number_padding_width: z.number(),
+  pad_char: z.string(),
+  separator: z.string(),
+  extension_separator: z.string(),
+});
 
-export interface SanitizeConfig {
-  invalid_chars_pattern: string;
-  whitespace_pattern: string;
-  multiple_dash_pattern: string;
-  leading_trailing_dash_pattern: string;
-  replacement_char: string;
-}
+export const courseScannerSchema = z.object({
+  week_pattern: z.string(),
+  sub_course_pattern: z.string(),
+  subtitle_extension: z.string(),
+});
 
-export interface UrlPatternsConfig {
-  course_slug: string;
-  specialization_slug: string;
-  site_name_strip_www: string;
-  site_name_default: string;
-  url_detect_pattern: string;
-}
+export const sanitizeSchema = z.object({
+  invalid_chars_pattern: z.string(),
+  whitespace_pattern: z.string(),
+  multiple_dash_pattern: z.string(),
+  leading_trailing_dash_pattern: z.string(),
+  replacement_char: z.string(),
+});
 
-export interface ExitCodesConfig {
-  success: number;
-  auth_error: number;
-  all_failed: number;
-  general_error: number;
-}
+export const urlPatternsSchema = z.object({
+  course_slug: z.string(),
+  specialization_slug: z.string(),
+  site_name_strip_www: z.string(),
+  site_name_default: z.string(),
+  url_detect_pattern: z.string(),
+});
 
-export interface DownloadConfig {
-  prefix_padding_width: number;
-  fallback_lang: string;
-}
+export const exitCodesSchema = z.object({
+  success: z.number(),
+  auth_error: z.number(),
+  all_failed: z.number(),
+  general_error: z.number(),
+});
 
-export interface RateLimitConfig {
-  default_requests_per_minute: number;
-  domain_requests_per_minute: Record<string, number>;
-}
+export const downloadSchema = z.object({
+  prefix_padding_width: z.number(),
+  fallback_lang: z.string(),
+});
 
-export interface CourseraConfig {
-  course_path_prefix: string;
-  next_data_selector: string;
-  lecture_type_name: string;
-  default_week_number: number;
-  default_week_title: string;
-  vtt_extension: string;
-  format_vtt: string;
-  format_srt: string;
-}
+export const rateLimitSchema = z.object({
+  default_requests_per_minute: z.number(),
+  domain_requests_per_minute: z.record(z.string(), z.number()),
+});
 
-export interface RetryConfig {
-  exponential_base: number;
-}
+export const courseraSchema = z.object({
+  course_path_prefix: z.string(),
+  next_data_selector: z.string(),
+  lecture_type_name: z.string(),
+  default_week_number: z.number(),
+  default_week_title: z.string(),
+  vtt_extension: z.string(),
+  format_vtt: z.string(),
+  format_srt: z.string(),
+});
 
-export interface ProxyConfig {
-  env_vars: string[];
-}
+export const retrySchema = z.object({
+  exponential_base: z.number(),
+});
 
-export interface ErrorMessagesConfig {
-  auth_error_patterns: string[];
-  access_error_patterns: string[];
-  auth_error_hint: string;
-  access_error_hint: string;
-}
+export const proxySchema = z.object({
+  env_vars: z.array(z.string()),
+});
 
-export interface AppConfig {
-  output_dir: string;
-  cookies_file: string;
-  concurrency: number;
-  timeout: number;
-  retry_max: number;
-  preferred_lang: string;
-  max_filename_length: number;
-  retry_base_ms: number;
-  user_agent: string;
-  base_url: string;
-  empty_subtitle_placeholder: string;
-  rate_limit: RateLimitConfig;
-  llm: LlmConfig;
-  summarize: SummarizeConfig;
-  rate_limiter: RateLimiterConfig;
-  path_builder: PathBuilderConfig;
-  course_scanner: CourseScannerConfig;
-  sanitize: SanitizeConfig;
-  url_patterns: UrlPatternsConfig;
-  exit_codes: ExitCodesConfig;
-  download: DownloadConfig;
-  coursera: CourseraConfig;
-  retry: RetryConfig;
-  proxy: ProxyConfig;
-  error_messages: ErrorMessagesConfig;
-}
+export const errorMessagesSchema = z.object({
+  auth_error_patterns: z.array(z.string()),
+  access_error_patterns: z.array(z.string()),
+  auth_error_hint: z.string(),
+  access_error_hint: z.string(),
+});
 
-export const DEFAULT_CONFIG: AppConfig = {
-  output_dir: './subtitles',
-  cookies_file: './cookies.txt',
-  concurrency: 3,
-  timeout: 30,
-  retry_max: 3,
-  preferred_lang: 'en',
-  max_filename_length: 200,
-  retry_base_ms: 1000,
-  user_agent:
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  base_url: 'https://www.coursera.org',
-  empty_subtitle_placeholder: '[字幕内容为空]',
-  rate_limit: {
-    default_requests_per_minute: 30,
-    domain_requests_per_minute: {
-      'www.coursera.org': 50,
-    },
-  },
-  llm: {
-    base_url: 'https://api.openai.com/v1',
-    api_key: '',
-    model: 'gpt-4o',
-    reasoning_effort: '',
-    max_completion_tokens: 0,
-    timeout: 600_000,
-  },
-  summarize: {
-    prompt: `请基于以下课程字幕内容，生成一份完整、连贯、结构化的课程学习笔记。
-要求：
-- 提取关键概念、重要定义、核心论点
-- 按主题组织内容，消除重复
-- 使用 Markdown 格式，层次分明
-- 保留重要的专业术语（英文原文）`,
-    output_filename: 'summary.md',
-  },
-  rate_limiter: {
-    rpm_to_ms_multiplier: 60000,
-    min_delay_factor: 0.5,
-    max_delay_factor: 1.5,
-  },
-  path_builder: {
-    number_padding_width: 2,
-    pad_char: '0',
-    separator: '-',
-    extension_separator: '.',
-  },
-  course_scanner: {
-    week_pattern: '^Week\\s+(\\d+)$',
-    sub_course_pattern: '^(\\d+)\\s*-\\s*',
-    subtitle_extension: '.vtt',
-  },
-  sanitize: {
-    invalid_chars_pattern: '[<>"\":"/\\\\|?*&@#$%^(){}[\\];\',.!~`\\x00-\\x1f]',
-    whitespace_pattern: '\\s+',
-    multiple_dash_pattern: '-+',
-    leading_trailing_dash_pattern: '^-+|-+$',
-    replacement_char: '-',
-  },
-  url_patterns: {
-    course_slug: 'coursera\\.org/learn/([^/?#]+)',
-    specialization_slug: 'coursera\\.org/specializations/([^/?#]+)',
-    site_name_strip_www: '^www\\.',
-    site_name_default: 'unknown',
-    url_detect_pattern: '^https?://',
-  },
-  exit_codes: {
-    success: 0,
-    auth_error: 2,
-    all_failed: 3,
-    general_error: 1,
-  },
-  download: {
-    prefix_padding_width: 2,
-    fallback_lang: 'en',
-  },
-  coursera: {
-    course_path_prefix: '/learn/',
-    next_data_selector: 'script#__NEXT_DATA__',
-    lecture_type_name: 'lecture',
-    default_week_number: 1,
-    default_week_title: 'Week 1',
-    vtt_extension: '.vtt',
-    format_vtt: 'vtt',
-    format_srt: 'srt',
-  },
-  retry: {
-    exponential_base: 2,
-  },
-  proxy: {
-    env_vars: ['HTTPS_PROXY', 'https_proxy'],
-  },
-  error_messages: {
-    auth_error_patterns: ['认证失败', '401'],
-    access_error_patterns: ['无权访问', '403'],
-    auth_error_hint:
-      '认证失败（Cookie 无效或已过期）。请重新导出 cookies.txt：\n' +
-      '1. 在浏览器中登录目标网站\n' +
-      '2. 使用浏览器扩展导出 cookies.txt\n' +
-      '3. 确认已登录并有访问权限',
-    access_error_hint:
-      '无权访问（需要登录或付费）。请确认：\n' +
-      '1. 在浏览器中登录目标网站\n' +
-      '2. 使用浏览器扩展导出 cookies.txt\n' +
-      '3. 确认有访问权限',
-  },
-};
+export const appConfigSchema = z.object({
+  output_dir: z.string(),
+  cookies_file: z.string(),
+  concurrency: z.number(),
+  timeout: z.number(),
+  retry_max: z.number(),
+  preferred_lang: z.string(),
+  max_filename_length: z.number(),
+  retry_base_ms: z.number(),
+  user_agent: z.string(),
+  base_url: z.string(),
+  empty_subtitle_placeholder: z.string(),
+  rate_limit: rateLimitSchema,
+  llm: llmSchema,
+  summarize: summarizeSchema,
+  rate_limiter: rateLimiterSchema,
+  path_builder: pathBuilderSchema,
+  course_scanner: courseScannerSchema,
+  sanitize: sanitizeSchema,
+  url_patterns: urlPatternsSchema,
+  exit_codes: exitCodesSchema,
+  download: downloadSchema,
+  coursera: courseraSchema,
+  retry: retrySchema,
+  proxy: proxySchema,
+  error_messages: errorMessagesSchema,
+});
+
+export type AppConfig = z.infer<typeof appConfigSchema>;
+export type LlmConfig = z.infer<typeof llmSchema>;
+export type SummarizeConfig = z.infer<typeof summarizeSchema>;
+export type RateLimiterConfig = z.infer<typeof rateLimiterSchema>;
+export type PathBuilderConfig = z.infer<typeof pathBuilderSchema>;
+export type CourseScannerConfig = z.infer<typeof courseScannerSchema>;
+export type SanitizeConfig = z.infer<typeof sanitizeSchema>;
+export type UrlPatternsConfig = z.infer<typeof urlPatternsSchema>;
+export type ExitCodesConfig = z.infer<typeof exitCodesSchema>;
+export type DownloadConfig = z.infer<typeof downloadSchema>;
+export type RateLimitConfig = z.infer<typeof rateLimitSchema>;
+export type CourseraConfig = z.infer<typeof courseraSchema>;
+export type RetryConfig = z.infer<typeof retrySchema>;
+export type ProxyConfig = z.infer<typeof proxySchema>;
+export type ErrorMessagesConfig = z.infer<typeof errorMessagesSchema>;
