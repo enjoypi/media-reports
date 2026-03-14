@@ -15,6 +15,10 @@ export interface ParseCourseInput {
   courseUrl: string;
 }
 
+export interface ParseCourseOptions {
+  courseSlugPattern: string;
+}
+
 export class ParseCourseUseCase {
   constructor(
     private primaryFetcher: CourseFetcher,
@@ -22,6 +26,7 @@ export class ParseCourseUseCase {
     private subtitleSource: SubtitleSource,
     private retryPolicy: RetryPolicy,
     private logger: Logger,
+    private options: ParseCourseOptions,
   ) {}
 
   async execute(input: ParseCourseInput): Promise<Course> {
@@ -62,7 +67,7 @@ export class ParseCourseUseCase {
   }
 
   private extractSlug(url: string): string | null {
-    const match = url.match(/coursera\.org\/learn\/([^/?#]+)/);
+    const match = url.match(new RegExp(this.options.courseSlugPattern));
     return match ? match[1] : null;
   }
 

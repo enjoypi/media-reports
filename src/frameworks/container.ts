@@ -21,7 +21,7 @@ import { FileSystemCourseScanner } from '../adapters/fs-course-scanner.js';
 import { LibVttParser } from '../adapters/vtt-parser-adapter.js';
 import { OpenAiLlmClient } from '../adapters/openai-llm-client.js';
 import { CourseraHtmlCourseFetcher } from '../adapters/coursera/html-course-fetcher.js';
-import { CourseraSpecializationFetcher, extractSpecSlug } from '../adapters/coursera/specialization-fetcher.js';
+import { CourseraSpecializationFetcher } from '../adapters/coursera/specialization-fetcher.js';
 import { DomainRateLimiter } from '../adapters/domain-rate-limiter.js';
 import { loadConfig } from './config-loader.js';
 import { loadCookies } from '../adapters/cookie-loader.js';
@@ -36,8 +36,6 @@ export interface Container {
   logger: ConsoleLogger;
   getSummarizeUseCase(): SummarizeCourseUseCase;
 }
-
-export { extractSpecSlug };
 
 export function createContainer(explicitConfigPath?: string): Container {
   const logger = new ConsoleLogger();
@@ -61,6 +59,9 @@ export function createContainer(explicitConfigPath?: string): Container {
     {
       defaultRequestsPerMinute: config.rate_limit.default_requests_per_minute,
       domainRequestsPerMinute: config.rate_limit.domain_requests_per_minute,
+      rpmToMsMultiplier: config.rate_limiter.rpm_to_ms_multiplier ?? 60000,
+      minDelayFactor: config.rate_limiter.min_delay_factor ?? 0.5,
+      maxDelayFactor: config.rate_limiter.max_delay_factor ?? 1.5,
     },
     logger,
   );
@@ -69,10 +70,14 @@ export function createContainer(explicitConfigPath?: string): Container {
   const courseFetcher = new CourseraCourseFetcher(httpClient, { baseUrl: config.base_url });
   const subtitleSource = new CourseraSubtitleSource(httpClient, { baseUrl: config.base_url });
   const fileSystem = new NodeFileSystem();
-  const pathBuilder = new DefaultPathBuilder({ maxFilenameLength: config.max_filename_length });
-  const courseScanner = new FileSystemCourseScanner();
+  const pathBuilder = new DefaultPathBuilder({ maxFilenameLength: config.max_filename_length, numberPaddingWidth: config.path_builder.number_padding_width ?? 2, sanitizeConfig: config.sanitize });
+  const courseScanner = new FileSystemCourseScanner({
+    weekPattern: config.course_scanner.week_pattern,
+    subCoursePattern: config.course_scanner.sub_course_pattern,
+    subtitleExtension: config.course_scanner.subtitle_extension,
+  });
   const vttParser = new LibVttParser({ emptyPlaceholder: config.empty_subtitle_placeholder });
-  const specializationFetcher = new CourseraSpecializationFetcher(httpClient, { baseUrl: config.base_url });
+  const specializationFetcher = new CourseraSpecializationFetcher(httpClient, { baseUrl: config.base_url, specializationSlugPattern: config.url_patterns.specialization_slug });
 
   // Use Cases (注入依赖)
   const htmlCourseFetcher = new CourseraHtmlCourseFetcher(httpClient, { baseUrl: config.base_url });
@@ -82,6 +87,7 @@ export function createContainer(explicitConfigPath?: string): Container {
     subtitleSource,
     retryPolicy,
     logger,
+    { courseSlugPattern: config.url_patterns.course_slug },
   );
 
   const downloadSubtitlesUseCase = new DownloadSubtitlesUseCase(

@@ -8,7 +8,10 @@ import type { Logger } from '../usecases/ports.js';
 
 export interface DomainRateLimiterOptions {
   defaultRequestsPerMinute: number;
-  domainRequestsPerMinute?: Record<string, number>;
+  domainRequestsPerMinute: Record<string, number>;
+  rpmToMsMultiplier: number;
+  minDelayFactor: number;
+  maxDelayFactor: number;
 }
 
 export class DomainRateLimiter {
@@ -36,10 +39,12 @@ export class DomainRateLimiter {
   }
 
   private async applyRandomDelay(rpm: number, domain: string): Promise<void> {
-    const avgInterval = 60000 / rpm;
-    // 最小间隔为平均间隔的一半，最大为1.5倍，确保不会 burst
-    const minDelay = avgInterval / 2;
-    const maxDelay = avgInterval * 1.5;
+    const multiplier = this.options.rpmToMsMultiplier;
+    const minFactor = this.options.minDelayFactor;
+    const maxFactor = this.options.maxDelayFactor;
+    const avgInterval = multiplier / rpm;
+    const minDelay = avgInterval * minFactor;
+    const maxDelay = avgInterval * maxFactor;
     const delay = minDelay + Math.random() * (maxDelay - minDelay);
     this.logger.debug(`[${domain}] 间隔 ${Math.round(delay)}ms (RPM: ${rpm})`);
     await this.sleep(delay);

@@ -49,6 +49,13 @@ function readAndMerge(p: string, logger?: Logger): AppConfig {
         ...(parsed?.rate_limit?.domain_requests_per_minute ?? {}),
       },
     },
+    rate_limiter: { ...DEFAULT_CONFIG.rate_limiter, ...(parsed?.rate_limiter ?? {}) },
+    path_builder: { ...DEFAULT_CONFIG.path_builder, ...(parsed?.path_builder ?? {}) },
+    course_scanner: { ...DEFAULT_CONFIG.course_scanner, ...(parsed?.course_scanner ?? {}) },
+    sanitize: { ...DEFAULT_CONFIG.sanitize, ...(parsed?.sanitize ?? {}) },
+    url_patterns: { ...DEFAULT_CONFIG.url_patterns, ...(parsed?.url_patterns ?? {}) },
+    exit_codes: { ...DEFAULT_CONFIG.exit_codes, ...(parsed?.exit_codes ?? {}) },
+    download: { ...DEFAULT_CONFIG.download, ...(parsed?.download ?? {}) },
   };
 }
 

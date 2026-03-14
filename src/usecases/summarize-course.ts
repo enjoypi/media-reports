@@ -10,6 +10,7 @@ export interface SummarizeCourseInput {
   subCourse: SubCourse;
   outputDir: string;
   systemPrompt: string;
+  outputFilename: string;
 }
 
 export class SummarizeCourseUseCase {
@@ -41,7 +42,7 @@ export class SummarizeCourseUseCase {
   }
 
   private resolveOutputPath(input: SummarizeCourseInput): string {
-    return `${input.outputDir || input.subCourse.path}/summary.md`;
+    return `${input.outputDir || input.subCourse.path}/${input.outputFilename}`;
   }
 
   private buildFullContent(subCourse: SubCourse): string {

@@ -8,10 +8,23 @@ import { readdirSync, statSync } from 'node:fs';
 import { join, basename, extname } from 'node:path';
 import type { CourseScanner, ScannedCourse, ScannedLesson, ScannedWeek, SubCourse } from '../usecases/ports.js';
 
-const WEEK_PATTERN = /^Week\s+(\d+)$/i;
-const SUB_COURSE_PATTERN = /^(\d+)\s*-\s*/;
+export interface CourseScannerOptions {
+  weekPattern: string;
+  subCoursePattern: string;
+  subtitleExtension: string;
+}
 
 export class FileSystemCourseScanner implements CourseScanner {
+  private weekPatternRegex: RegExp;
+  private subCoursePatternRegex: RegExp;
+  private subtitleExtension: string;
+
+  constructor(options: CourseScannerOptions) {
+    this.weekPatternRegex = new RegExp(options.weekPattern, 'i');
+    this.subCoursePatternRegex = new RegExp(options.subCoursePattern);
+    this.subtitleExtension = options.subtitleExtension;
+  }
+
   scan(coursePath: string): ScannedCourse {
     const name = basename(coursePath);
 
@@ -32,12 +45,12 @@ export class FileSystemCourseScanner implements CourseScanner {
 
   private isSpecialization(coursePath: string): boolean {
     const entries = readdirSync(coursePath);
-    return entries.some((e) => SUB_COURSE_PATTERN.test(e) && statSync(join(coursePath, e)).isDirectory());
+    return entries.some((e) => this.subCoursePatternRegex.test(e) && statSync(join(coursePath, e)).isDirectory());
   }
 
   private scanSubCourses(specPath: string): SubCourse[] {
     return readdirSync(specPath)
-      .filter((d) => SUB_COURSE_PATTERN.test(d) && statSync(join(specPath, d)).isDirectory())
+      .filter((d) => this.subCoursePatternRegex.test(d) && statSync(join(specPath, d)).isDirectory())
       .sort()
       .map((d) => {
         const scPath = join(specPath, d);
@@ -48,9 +61,10 @@ export class FileSystemCourseScanner implements CourseScanner {
 
   private scanWeeks(coursePath: string): ScannedWeek[] {
     return readdirSync(coursePath)
-      .filter((d) => WEEK_PATTERN.test(d) && statSync(join(coursePath, d)).isDirectory())
+      .filter((d) => this.weekPatternRegex.test(d) && statSync(join(coursePath, d)).isDirectory())
       .map((d) => {
-        const num = parseInt(WEEK_PATTERN.exec(d)![1], 10);
+        const match = this.weekPatternRegex.exec(d);
+        const num = match ? parseInt(match[1], 10) : 0;
         const wPath = join(coursePath, d);
         return { number: num, path: wPath, lessons: this.scanLessons(wPath) };
       })
@@ -60,7 +74,7 @@ export class FileSystemCourseScanner implements CourseScanner {
 
   private scanLessons(weekPath: string): ScannedLesson[] {
     return readdirSync(weekPath)
-      .filter((f) => extname(f).toLowerCase() === '.vtt')
+      .filter((f) => extname(f).toLowerCase() === this.subtitleExtension)
       .sort()
       .map((f) => ({ title: basename(f, extname(f)), vttPath: join(weekPath, f) }));
   }

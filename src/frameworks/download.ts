@@ -6,17 +6,18 @@
 
 import { join } from 'node:path';
 import { Command } from 'commander';
-import { createContainer, extractSpecSlug } from './container.js';
+import { createContainer } from './container.js';
 import { DownloadStatus } from '../usecases/ports.js';
 import type { DownloadResult } from '../usecases/ports.js';
 import { sanitize } from '../entities/sanitize.js';
+import { extractSpecSlug } from '../adapters/coursera/specialization-fetcher.js';
 
-function extractSiteName(url: string): string {
+function extractSiteName(url: string, stripPattern: string, defaultName: string): string {
   try {
     const hostname = new URL(url).hostname;
-    return hostname.replace(/^www\./, '') || 'unknown';
+    return hostname.replace(new RegExp(stripPattern), '') || defaultName;
   } catch {
-    return 'unknown';
+    return defaultName;
   }
 }
 
@@ -40,9 +41,9 @@ export function registerDownload(program: Command): void {
       if (opts.output) config.output_dir = opts.output;
 
       try {
-        const siteName = extractSiteName(url);
+        const siteName = extractSiteName(url, config.url_patterns.site_name_strip_www, config.url_patterns.site_name_default);
         const baseOutputDir = join(config.output_dir, siteName);
-        const specSlug = extractSpecSlug(url);
+        const specSlug = extractSpecSlug(url, config.url_patterns.specialization_slug);
         if (specSlug) {
           await handleSpecialization(specSlug, container, baseOutputDir);
         } else {
@@ -53,7 +54,7 @@ export function registerDownload(program: Command): void {
             outputDir: baseOutputDir,
             concurrency: config.concurrency,
           });
-          process.exit(hasAllFailed(results) ? 3 : 0);
+          process.exit(hasAllFailed(results) ? config.exit_codes.all_failed : config.exit_codes.success);
         }
       } catch (err) {
         const error = err as Error;
@@ -66,7 +67,7 @@ export function registerDownload(program: Command): void {
             '2. 使用浏览器扩展导出 cookies.txt\n' +
             '3. 确认已登录并有访问权限',
           );
-          process.exit(2);
+          process.exit(config.exit_codes.auth_error);
         }
         if (msg.includes('无权访问') || msg.includes('403')) {
           console.error(
@@ -75,10 +76,10 @@ export function registerDownload(program: Command): void {
             '2. 使用浏览器扩展导出 cookies.txt\n' +
             '3. 确认有访问权限',
           );
-          process.exit(2);
+          process.exit(config.exit_codes.auth_error);
         }
         console.error(msg);
-        process.exit(1);
+        process.exit(config.exit_codes.general_error);
       }
     });
 }
@@ -98,9 +99,9 @@ async function handleSpecialization(
   let totalFailed = 0;
 
   for (const c of spec.courses) {
-    const prefix = String(c.index).padStart(2, '0');
-    const safeSpecName = sanitize(spec.name, config.max_filename_length);
-    const safeCourseName = sanitize(c.name, config.max_filename_length);
+    const prefix = String(c.index).padStart(config.download.prefix_padding_width, '0');
+    const safeSpecName = sanitize(spec.name, config.max_filename_length, config.sanitize);
+    const safeCourseName = sanitize(c.name, config.max_filename_length, config.sanitize);
     const courseOutputDir = join(baseOutputDir, safeSpecName, `${prefix}-${safeCourseName}`);
     container.logger.info(`\n[${c.index}/${spec.courses.length}] ${c.name}`);
 
@@ -126,5 +127,5 @@ async function handleSpecialization(
   }
 
   container.logger.info(`\nSpecialization 下载完成: ${spec.courses.length - totalFailed} 成功, ${totalFailed} 失败`);
-  process.exit(totalFailed === spec.courses.length ? 3 : 0);
+  process.exit(totalFailed === spec.courses.length ? config.exit_codes.all_failed : config.exit_codes.success);
 }

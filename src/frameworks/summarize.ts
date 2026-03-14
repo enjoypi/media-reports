@@ -9,13 +9,6 @@ import { existsSync } from 'node:fs';
 import { Command } from 'commander';
 import { createContainer } from './container.js';
 
-const DEFAULT_PROMPT = `请基于以下课程字幕内容，生成一份完整、连贯、结构化的课程学习笔记。
-要求：
-- 提取关键概念、重要定义、核心论点
-- 按主题组织内容，消除重复
-- 使用 Markdown 格式，层次分明
-- 保留重要的专业术语（英文原文）`;
-
 export function registerSummarize(program: Command): void {
   program
     .command('summarize')
@@ -29,10 +22,8 @@ export function registerSummarize(program: Command): void {
       const config = container.config;
       const failures: string[] = [];
 
-      const systemPrompt = config.summarize.prompt?.trim() || DEFAULT_PROMPT;
-      if (!config.summarize.prompt?.trim()) {
-        container.logger.info('未配置自定义 Prompt，使用默认 Prompt');
-      }
+      const systemPrompt = config.summarize.prompt;
+      const outputFilename = config.summarize.output_filename;
 
       for (const cp of coursePaths) {
         const absPath = resolve(cp);
@@ -46,7 +37,7 @@ export function registerSummarize(program: Command): void {
 
           for (const sc of course.subCourses) {
             const outDir = opts.output ? resolve(opts.output) : undefined;
-            const summaryPath = resolve(outDir ?? sc.path, 'summary.md');
+            const summaryPath = resolve(outDir ?? sc.path, outputFilename);
 
             if (!opts.force && existsSync(summaryPath)) {
               container.logger.info(`跳过（已存在）: ${summaryPath}，使用 --force 覆盖`);
@@ -57,6 +48,7 @@ export function registerSummarize(program: Command): void {
               subCourse: sc,
               outputDir: outDir ?? sc.path,
               systemPrompt,
+              outputFilename,
             });
           }
         } catch (err) {

@@ -6,6 +6,9 @@
 
 import type { HttpClient } from '../usecases/ports.js';
 
+/** 秒转毫秒的转换因子 */
+const MS_PER_SECOND = 1000;
+
 export interface FetchHttpClientOptions {
   timeout: number;
   userAgent: string;
@@ -26,7 +29,7 @@ export class FetchHttpClient implements HttpClient {
     }
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.options.timeout * 1000);
+    const timer = setTimeout(() => controller.abort(), this.options.timeout * MS_PER_SECOND);
 
     try {
       const res = await fetch(url, { headers, signal: controller.signal, redirect: 'follow' });

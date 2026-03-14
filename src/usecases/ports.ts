@@ -11,7 +11,7 @@
  */
 
 import type { Course, SubtitleMeta } from '../entities/course.js';
-import type { ScannedCourse, SubCourse } from '../entities/course-scan.js';
+import type { ScannedCourse } from '../entities/course-scan.js';
 
 // =============================================================================
 // Entity: 纯业务实体（重新导出，统一入口）

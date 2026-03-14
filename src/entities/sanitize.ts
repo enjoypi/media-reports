@@ -1,9 +1,11 @@
-export function sanitize(name: string, maxLength: number): string {
+import type { SanitizeConfig } from './config.js';
+
+export function sanitize(name: string, maxLength: number, config: SanitizeConfig): string {
   return name
     .toLowerCase()
-    .replace(/[<>"\":"/\\|?*&@#$%^(){}[\];',.!~`\x00-\x1f]/g, '-')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(new RegExp(config.invalid_chars_pattern, 'g'), config.replacement_char)
+    .replace(new RegExp(config.whitespace_pattern, 'g'), config.replacement_char)
+    .replace(new RegExp(config.multiple_dash_pattern, 'g'), config.replacement_char)
+    .replace(new RegExp(config.leading_trailing_dash_pattern, 'g'), '')
     .slice(0, maxLength);
 }

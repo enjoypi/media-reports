@@ -16,6 +16,7 @@ interface CoursesResponse {
 
 export interface SpecializationFetcherOptions {
   baseUrl: string;
+  specializationSlugPattern: string;
 }
 
 export class CourseraSpecializationFetcher implements SpecializationFetcher {
@@ -65,7 +66,7 @@ export class CourseraSpecializationFetcher implements SpecializationFetcher {
   }
 }
 
-export function extractSpecSlug(url: string): string | null {
-  const match = url.match(/coursera\.org\/specializations\/([^/?#]+)/);
+export function extractSpecSlug(url: string, pattern: string): string | null {
+  const match = url.match(new RegExp(pattern));
   return match ? match[1] : null;
 }
