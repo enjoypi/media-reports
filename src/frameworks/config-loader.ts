@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { parse } from 'yaml';
-import { AppConfig, DEFAULT_CONFIG } from '../entities/config.js';
+import { appConfigSchema, type AppConfig } from '../entities/config.js';
 import type { Logger } from '../usecases/ports.js';
 
 const CONFIG_FILENAME = 'config.yaml';
@@ -32,35 +32,11 @@ function applyEnvOverrides(config: AppConfig): void {
   if (process.env['LLM_MODEL']) config.llm.model = process.env['LLM_MODEL'];
 }
 
-function readAndMerge(p: string, logger?: Logger): AppConfig {
+function readAndValidate(p: string, logger?: Logger): AppConfig {
   logger?.info(`加载配置: ${p}`);
   const raw = readFileSync(p, 'utf-8');
-  const parsed = parse(raw) as Partial<AppConfig> | null;
-  return {
-    ...DEFAULT_CONFIG,
-    ...parsed,
-    llm: { ...DEFAULT_CONFIG.llm, ...(parsed?.llm ?? {}) },
-    summarize: { ...DEFAULT_CONFIG.summarize, ...(parsed?.summarize ?? {}) },
-    rate_limit: {
-      ...DEFAULT_CONFIG.rate_limit,
-      ...(parsed?.rate_limit ?? {}),
-      domain_requests_per_minute: {
-        ...DEFAULT_CONFIG.rate_limit.domain_requests_per_minute,
-        ...(parsed?.rate_limit?.domain_requests_per_minute ?? {}),
-      },
-    },
-    rate_limiter: { ...DEFAULT_CONFIG.rate_limiter, ...(parsed?.rate_limiter ?? {}) },
-    path_builder: { ...DEFAULT_CONFIG.path_builder, ...(parsed?.path_builder ?? {}) },
-    course_scanner: { ...DEFAULT_CONFIG.course_scanner, ...(parsed?.course_scanner ?? {}) },
-    sanitize: { ...DEFAULT_CONFIG.sanitize, ...(parsed?.sanitize ?? {}) },
-    url_patterns: { ...DEFAULT_CONFIG.url_patterns, ...(parsed?.url_patterns ?? {}) },
-    exit_codes: { ...DEFAULT_CONFIG.exit_codes, ...(parsed?.exit_codes ?? {}) },
-    download: { ...DEFAULT_CONFIG.download, ...(parsed?.download ?? {}) },
-    coursera: { ...DEFAULT_CONFIG.coursera, ...(parsed?.coursera ?? {}) },
-    retry: { ...DEFAULT_CONFIG.retry, ...(parsed?.retry ?? {}) },
-    proxy: { ...DEFAULT_CONFIG.proxy, ...(parsed?.proxy ?? {}) },
-    error_messages: { ...DEFAULT_CONFIG.error_messages, ...(parsed?.error_messages ?? {}) },
-  };
+  const parsed = parse(raw);
+  return appConfigSchema.parse(parsed);
 }
 
 export function loadConfig(explicitPath?: string, logger?: Logger): AppConfig {
@@ -68,11 +44,11 @@ export function loadConfig(explicitPath?: string, logger?: Logger): AppConfig {
   let config: AppConfig;
   if (explicitPath) {
     if (!existsSync(explicitPath)) throw new Error(`配置文件不存在: ${explicitPath}`);
-    config = readAndMerge(explicitPath, logger);
+    config = readAndValidate(explicitPath, logger);
   } else {
     const found = CONFIG_PATHS.find((p) => existsSync(p));
-    config = found ? readAndMerge(found, logger) : structuredClone(DEFAULT_CONFIG);
-    if (!found) logger?.info('未找到配置文件，使用默认配置');
+    if (!found) throw new Error('未找到配置文件 config.yaml');
+    config = readAndValidate(found, logger);
   }
   applyEnvOverrides(config);
   return config;

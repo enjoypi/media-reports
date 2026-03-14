@@ -12,7 +12,7 @@ import { registerSummarize } from './summarize.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { DEFAULT_CONFIG } from '../entities/config.js';
+import { loadConfig } from './config-loader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,7 +31,8 @@ registerSummarize(program);
 // 向后兼容：argv 中直接传入 URL 时，自动注入 download 子命令
 const userArgStart = 2;
 const args = process.argv.slice(userArgStart);
-const urlDetectPattern = new RegExp(DEFAULT_CONFIG.url_patterns.url_detect_pattern);
+const config = loadConfig();
+const urlDetectPattern = new RegExp(config.url_patterns.url_detect_pattern);
 const firstNonOptionIdx = args.findIndex((a) => !a.startsWith('-'));
 if (firstNonOptionIdx >= 0 && urlDetectPattern.test(args[firstNonOptionIdx])) {
   process.argv.splice(userArgStart + firstNonOptionIdx, 0, 'download');

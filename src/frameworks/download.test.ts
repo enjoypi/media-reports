@@ -5,9 +5,9 @@
 
 import { describe, it, expect } from 'vitest';
 import { sanitize } from '../entities/sanitize.js';
-import { DEFAULT_CONFIG } from '../entities/config.js';
+import { loadConfig } from './config-loader.js';
 
-const sanitizeConfig = DEFAULT_CONFIG.sanitize;
+const sanitizeConfig = loadConfig().sanitize;
 
 // 测试 sanitize 函数在目录名和文件名中的一致性
 describe('sanitize', () => {
